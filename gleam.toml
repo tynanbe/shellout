@@ -1,0 +1,7 @@
+name = "shellout"
+version = "0.1.0"
+
+[repository]
+type = "github"
+user = "tynanbe"
+repo = "shellout"
