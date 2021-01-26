@@ -4,7 +4,7 @@ defmodule Shellout.MixProject do
   def project do
     [
       app: :shellout,
-      version: "0.1.0",
+      version: "0.1.1",
       description: "A Gleam wrapper for Elixir.System.cmd/3",
       package: %{
         files: [
