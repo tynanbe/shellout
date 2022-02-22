@@ -1,10 +1,10 @@
-# shellout
+# shellout 🐢
 
 [![Hex Package](https://img.shields.io/hexpm/v/shellout?color=ffaff3&label=%F0%9F%93%A6)](https://hex.pm/packages/shellout)
 [![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3?label=%F0%9F%93%9A)](https://hexdocs.pm/shellout/)
-[![License](https://img.shields.io/hexpm/l/shellout?color=ffaff3&label=%F0%9F%93%83)](https://hex.pm/packages/shellout)
+[![License](https://img.shields.io/hexpm/l/shellout?color=ffaff3&label=%F0%9F%93%83)](https://github.com/tynanbe/shellout/blob/main/LICENSE)
 
-A Gleam wrapper for [`Elixir.System.cmd/3`](https://hexdocs.pm/elixir/master/System.html#cmd/3)
+A Gleam library for cross-platform shell operations.
 
 ## Usage
 
