@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - "v*.*.*"
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: erlef/setup-beam@v1
+        with:
+          otp-version: "24.3"
+          gleam-version: "0.21.0"
+
+      - run: gleam format --check src test
+
+      - run: gleam deps download
+
+      - uses: actions/cache@v2
+        with:
+          path: build/packages
+          key: ${{ runner.os }}-gleam-${{ hashFiles('**/manifest.toml') }}
+          restore-keys: ${{ runner.os }}-gleam-
+
+      - run: gleam test
+
+      - run: gleam test --target=javascript

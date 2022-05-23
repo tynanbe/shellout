@@ -1,125 +1,320 @@
-//// A Gleam wrapper for [`Elixir.System.cmd/3`](https://hexdocs.pm/elixir/master/System.html#cmd/3)
-////
-
-import gleam/atom
-import gleam/dynamic.{Dynamic, atom, int, list, string}
-import gleam/function
+import gleam/int
 import gleam/list
+import gleam/map.{Map}
 import gleam/result
 import gleam/string
 
-pub type CmdOpt {
-  Into(List(Nil))
-  Cd(String)
-  Env(List(tuple(String, String)))
-  Arg0(String)
-  StderrToStdout(Bool)
-  Parallelism(Bool)
+if erlang {
+  import gleam/erlang
 }
 
-pub type CmdResult =
-  Result(tuple(List(String), Int), String)
+/// TODO
+///
+pub type Lookup =
+  List(#(String, List(String)))
 
-/// Executes the given `command` with `args`.
+/// TODO
 ///
-/// `command` is expected to be an executable available in PATH unless an
-/// absolute path is given.
+pub type Lookups =
+  List(#(List(String), Lookup))
+
+/// TODO
 ///
-/// `args` must be a `List(String)` which the executable will receive as its
-/// arguments as is. This means that:
-/// - environment variables will not be interpolated
-/// - wildcard expansion will not happen
-/// - arguments do not need to be escaped or quoted for shell safety
+pub type StyleFlags =
+  Map(String, List(String))
+
+/// TODO
 ///
-/// This function returns a `Result`, where `success` is a
-/// `tuple(List(String), Int)` containing a `List` of lines collected from
-/// stdout, and the command exit status.
+pub const displays: Lookup = [
+  #("reset", ["0"]),
+  #("bold", ["1"]),
+  #("dim", ["2"]),
+  #("italic", ["3"]),
+  #("underline", ["4"]),
+  #("blink", ["5"]),
+  #("fastblink", ["6"]),
+  #("reverse", ["7"]),
+  #("hide", ["8"]),
+  #("strike", ["9"]),
+  #("normal", ["22"]),
+  #("noitalic", ["23"]),
+  #("nounderline", ["24"]),
+  #("noblink", ["25"]),
+  #("noreverse", ["27"]),
+  #("nohide", ["28"]),
+  #("nostrike", ["29"]),
+]
+
+/// TODO
 ///
-/// ## Examples
+pub const colors: Lookup = [
+  #("black", ["30"]),
+  #("red", ["31"]),
+  #("green", ["32"]),
+  #("yellow", ["33"]),
+  #("blue", ["34"]),
+  #("magenta", ["35"]),
+  #("cyan", ["36"]),
+  #("white", ["37"]),
+  #("default", ["39"]),
+  #("brightblack", ["90"]),
+  #("brightred", ["91"]),
+  #("brightgreen", ["92"]),
+  #("brightyellow", ["93"]),
+  #("brightblue", ["94"]),
+  #("brightmagenta", ["95"]),
+  #("brightcyan", ["96"]),
+  #("brightwhite", ["97"]),
+]
+
+/// TODO
 ///
-///    > shellout.cmd("printf", ["%s\n", "hi"], [])
-///    Ok(tuple(["hi\n"], 0))
-///
-///    > let options = [Env([tuple("MIX_ENV", "test")])]
-///    > shellout.cmd("printf", ["%s\n", "hi"], options)
-///    Ok(tuple(["hi\n"], 0))
-///
-///    > shellout.cmd("", [], [StderrToStdout(True)])
-///    Error("Error: Could not execute ``\n`` does not exist")
-///
-/// ## Options
-///
-/// - `Cd(String)` - the directory to run the command in
-/// - `Env(List(tuple(String, String)))` - Tuples contain environment key-value
-/// `String`s. The child process inherits all environment variables from its
-/// parent process, the Gleam application, except those overwritten or cleared
-/// using this option. Specify a value of `Nil` to clear (unset) an environment
-/// variable, which is useful for preventing credentials passed to the
-/// application from leaking into child processes.
-/// - `Arg0(String)` - sets the command arg0
-/// - `StderrToStdout(Bool)` - redirects stderr to stdout when `True`
-/// - `Parallelism(Bool)` - when `True`, the VM will schedule port tasks to
-/// improve parallelism in the system. If set to `False`, the VM will try to
-/// perform commands immediately, improving latency at the expense of
-/// parallelism. The default can be set on system startup by passing the "+spp"
-/// argument to `--erl`.
-///
-/// *Documentation adapted from [`Elixir.System.cmd/3`](https://hexdocs.pm/elixir/master/System.html#cmd/3)*
-///
-pub fn cmd(
-  bin command: String,
-  args args: List(String),
-  opts opts: List(CmdOpt),
-) -> CmdResult {
-  cmd_decoder(command, args, opts)
+pub fn display(values: List(String)) -> StyleFlags {
+  map.from_list([#("display", values)])
 }
 
-fn cmd_decoder(command, args, opts) -> CmdResult {
-  let opts =
-    opts
-    |> list.append([Into([])])
+/// TODO
+///
+pub fn color(values: List(String)) -> StyleFlags {
+  map.from_list([#("color", values)])
+}
 
-  let default_error = tuple(
-    atom.create_from_string("error"),
-    atom.create_from_string("nil"),
-  )
+/// TODO
+///
+pub fn background(values: List(String)) -> StyleFlags {
+  map.from_list([#("background", values)])
+}
 
-  fn() {
-    external_cmd(command, args, opts)
-    |> dynamic.typed_tuple2(
-      fn(list) {
-        list
-        |> dynamic.typed_list(string)
-      },
-      int,
-    )
-  }
-  |> function.rescue
-  |> result.map_error(fn(exception) {
-    let exception =
-      exception
-      |> dynamic.from
-      |> dynamic.typed_tuple2(atom, atom)
-      |> result.unwrap(or: default_error)
-
-    let tuple(_type, reason) = exception
-    let reason = case atom.to_string(reason) {
-      "argument_error" -> "Invalid arguments given"
-      "system_limit" -> "All Erlang emulator ports are in use"
-      "enomem" -> "Not enough memory"
-      "eagain" -> "No operating system processes available"
-      "enametoolong" -> "Command name is too long"
-      "emfile" -> "No available file descriptors"
-      "enfile" -> "File table is full"
-      "eacces" -> string.concat(["`", command, "` is not executable"])
-      "enoent" -> string.concat(["`", command, "` does not exist"])
-      _ -> "Unknown error"
-    }
-
-    string.concat(["Error: Could not execute `", command, "`\n", reason])
+/// TODO
+///
+pub fn style(
+  string: String,
+  with flags: StyleFlags,
+  custom lookups: Lookups,
+) -> String {
+  ["display", "color", "background"]
+  |> list.map(with: fn(flag) {
+    try strings = map.get(flags, flag)
+    lookups
+    |> list.filter_map(with: fn(item) {
+      let #(keys, lookup) = item
+      keys
+      |> list.find(one_that: fn(key) { key == flag })
+      |> result.map(with: fn(_) { lookup })
+    })
+    |> list.flatten
+    |> do_style(strings, flag)
+    |> Ok
   })
-  |> result.flatten
+  |> result.values
+  |> list.flatten
+  |> string.join(with: ";")
+  |> escape(string)
 }
 
-external fn external_cmd(String, List(String), List(CmdOpt)) -> Dynamic =
-  "Elixir.System" "cmd"
+if erlang {
+  fn escape(code: String, string: String) -> String {
+    string.concat(["\e[", code, "m", string, "\e[0m"])
+  }
+}
+
+if javascript {
+  external fn escape(String, String) -> String =
+    "./shellout_ffi.mjs" "escape"
+}
+
+type Style {
+  Name(String)
+  Rgb(List(String))
+}
+
+type StyleAcc {
+  StyleAcc(styles: List(Style), rgb_counter: Int)
+}
+
+fn do_style(lookup: Lookup, strings: List(String), flag: String) -> List(String) {
+  let lookup =
+    case flag {
+      "display" -> map.from_list(displays)
+      "color" -> map.from_list(colors)
+      "background" ->
+        colors
+        |> map.from_list
+        |> map.map_values(with: fn(_key, code) {
+          assert [code] = code
+          assert Ok(code) = int.parse(code)
+          [int.to_string(code + 10)]
+        })
+    }
+    |> map.merge(from: map.from_list(lookup))
+
+  let acc = StyleAcc(styles: [], rgb_counter: 0)
+  let acc =
+    strings
+    |> list.fold(
+      from: acc,
+      with: fn(acc, item) {
+        case int.parse(item) {
+          Ok(int) -> {
+            let item =
+              int
+              |> int.clamp(min: 0, max: 255)
+              |> int.to_string
+            let rgb_counter = acc.rgb_counter
+            case rgb_counter < 3 {
+              True if rgb_counter > 0 -> {
+                let [Rgb(values), ..styles] = acc.styles
+                StyleAcc(
+                  styles: [Rgb([item, ..values]), ..styles],
+                  rgb_counter: rgb_counter + 1,
+                )
+              }
+              _ -> StyleAcc(styles: [Rgb([item]), ..acc.styles], rgb_counter: 1)
+            }
+          }
+          _ -> StyleAcc(styles: [Name(item), ..acc.styles], rgb_counter: 0)
+        }
+      },
+    )
+
+  let prepare_rgb = fn(strings) {
+    let new_strings =
+      "0"
+      |> list.repeat(times: 3 - list.length(strings))
+      |> list.append(strings, _)
+    let code = case flag {
+      "color" -> "38"
+      _ -> "48"
+    }
+    [code, "2", ..new_strings]
+  }
+
+  acc.styles
+  |> list.reverse
+  |> list.filter_map(with: fn(style) {
+    case style {
+      Name(string) ->
+        lookup
+        |> map.get(string)
+        |> result.map(with: fn(strings) {
+          case list.length(strings) > 1 {
+            False -> strings
+            True -> prepare_rgb(strings)
+          }
+        })
+      Rgb(strings) ->
+        strings
+        |> list.reverse
+        |> prepare_rgb
+        |> Ok
+    }
+  })
+  |> list.flatten
+}
+
+/// TODO
+///
+pub fn arguments() -> List(String) {
+  do_arguments()
+}
+
+if erlang {
+  fn do_arguments() -> List(String) {
+    erlang.start_arguments()
+  }
+}
+
+if javascript {
+  external fn do_arguments() -> List(String) =
+    "./shellout_ffi.mjs" "start_arguments"
+}
+
+/// TODO
+///
+pub type CommandOpt {
+  // TODO
+  LetBeStderr
+  // TODO
+  // Implies LetBeStderr with the Erlang target.
+  LetBeStdout
+  // TODO
+  OverlappedStdio
+}
+
+/// TODO
+///
+/// By default, `stdout` is captured, and `stderr` is redirested to `stdin`.
+///
+/// With the JavaScript target, `stdin` is handled in
+/// [raw mode](https://www.wikiwand.com/en/Terminal_mode). With the Erlang
+/// target `stdin` is always handled in
+/// [cooked mode](https://www.wikiwand.com/en/Terminal_mode).
+///
+/// Note that while `shellout` aims for near feature parity between compilation
+/// targets, more advanced configurations are possible by using Node.js's
+/// [`child_process`](https://nodejs.org/api/child_process.html) functions
+/// directly.
+///
+pub fn command(
+  run executable: String,
+  with arguments: List(String),
+  in directory: String,
+  opt options: List(CommandOpt),
+) -> Result(String, #(Int, String)) {
+  options
+  |> list.map(with: fn(opt) { #(opt, True) })
+  |> map.from_list
+  |> do_command(executable, arguments, directory, _)
+}
+
+if erlang {
+  external fn do_command(
+    String,
+    List(String),
+    String,
+    Map(CommandOpt, Bool),
+  ) -> Result(String, #(Int, String)) =
+    "shellout_ffi" "os_command"
+}
+
+if javascript {
+  external fn do_command(
+    String,
+    List(String),
+    String,
+    Map(CommandOpt, Bool),
+  ) -> Result(String, #(Int, String)) =
+    "./shellout_ffi.mjs" "os_command"
+}
+
+/// TODO
+///
+pub fn exit(status: Int) -> Nil {
+  do_exit(status)
+}
+
+if erlang {
+  external fn do_exit(status: Int) -> Nil =
+    "erlang" "halt"
+}
+
+if javascript {
+  external fn do_exit(status: Int) -> Nil =
+    "" "process.exit"
+}
+
+/// TODO
+///
+pub fn which(executable: String) {
+  do_which(executable)
+}
+
+if erlang {
+  external fn do_which(String) -> Result(String, String) =
+    "shellout_ffi" "os_which"
+}
+
+if javascript {
+  external fn do_which(String) -> Result(String, String) =
+    "./shellout_ffi.mjs" "os_which"
+}

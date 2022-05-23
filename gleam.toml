@@ -1,7 +1,20 @@
 name = "shellout"
-version = "0.1.1"
+version = "1.0.0-dev"
+description = "A Gleam library for cross-platform shell operations"
+licences = ["Apache-2.0"]
 
 [repository]
-type = "github"
-user = "tynanbe"
 repo = "shellout"
+user = "tynanbe"
+type = "github"
+
+[[links]]
+href = "https://gleam.run/"
+title = "Website"
+
+[dependencies]
+gleam_erlang = "~> 0.9"
+gleam_stdlib = "~> 0.21"
+
+[dev-dependencies]
+gleeunit = "~> 0.6"

@@ -1,6 +1,0 @@
-%{
-  "eunit_formatters": {:hex, :eunit_formatters, "0.3.1", "7a6fc351eb5b873e2356b8852eb751e20c13a72fbca03393cf682b8483509573", [:rebar3], [], "hexpm", "64a40741429b7aff149c605d5a6135a48046af394a7282074e6003b3b56ae931"},
-  "gleam_stdlib": {:hex, :gleam_stdlib, "0.13.0", "604a40e0fbe6c688651a5ad5e892913ed314ab626d18d361a7fd8bf367907551", [:rebar3], [], "hexpm", "35a005f4daca2775687e46f4e20cec799563a698a16f8bcc0cf281522ad717f1"},
-  "mix_eunit": {:hex, :mix_eunit, "0.3.0", "0e3e23bbc1f428663ba6c0ce52731ea7bff381fcde1ea9198a1bd83ac26305b2", [:mix], [{:eunit_formatters, "~> 0.3.1", [hex: :eunit_formatters, repo: "hexpm", optional: false]}], "hexpm", "da776cf400b200992cc1e8240a608eb0969ec505cd4272a16d5f077c3d6922fb"},
-  "mix_gleam": {:hex, :mix_gleam, "0.1.0", "a0cee5d30de865124a32ca6cd53b64c3e2ac57f12adf6e47b88fb673f47c716e", [:mix], [], "hexpm", "9ff518e6aab444c7f2e74038f9383020ef89810cf1f4402911f33b202ffd72e7"},
-}
