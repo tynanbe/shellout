@@ -7,7 +7,13 @@
 
 A Gleam library for cross-platform shell operations.
 
+<br>
+
 ## Usage
+
+### Example
+
+• In `my_project/src/my_project.gleam`
 
 ```gleam
 import gleam/io
@@ -53,9 +59,12 @@ pub fn main() {
 }
 ```
 
-You can test the example above on the command line!
+### 🐚 You can test the above example with your shell!
+
+• In your terminal
 
 ```shell
+> cd my_project
 > gleam run -- -lah
 # ..
 > gleam run -- --lah
@@ -66,9 +75,13 @@ You can test the example above on the command line!
 # ..
 ```
 
+<br>
+
+## Installation
+
 ### As a dependency of your Gleam project
 
-Add `shellout` to `gleam.toml`:
+• Add `shellout` to `gleam.toml`
 
 ```toml
 [dependencies]
@@ -77,15 +90,19 @@ shellout = "~> 1.0"
 
 ### As a dependency of your Mix project
 
-Add `shellout` to `mix.exs`:
+• Add `shellout` to `mix.exs`
 
 ```elixir
-{:shellout, "~> 1.0"},
+defp deps do
+  [
+    {:shellout, "~> 1.0"},
+  ]
+end
 ```
 
 ### As a dependency of your Rebar3 project
 
-Add `shellout` to `rebar.config`:
+• Add `shellout` to `rebar.config`
 
 ```erlang
 {deps, [
