@@ -64,7 +64,7 @@ export function os_command(command, args, dir, opts) {
   };
   let stdin = "inherit";
   let stdout = "pipe";
-  let stderr = process.stdout;
+  let stderr = "pipe";
   let spawnOpts = { cwd: dir, windowsHide: true };
   if (getBool(opts, new OverlappedStdio())) {
     stdin = stdout = "overlapped";
@@ -80,10 +80,13 @@ export function os_command(command, args, dir, opts) {
   spawnOpts.stdio = [stdin, stdout, stderr];
   let result = child_process.spawnSync(command, args.toArray(), spawnOpts);
   let output = result.stdout ? result.stdout.toString() : "";
+  output += result.stderr ? result.stderr.toString() : "";
   let status = result.status;
   if (status === null) {
     let signal = Signals[result.signal];
     status = signal !== Nil ? signal : 0;
+    // `yash`-like status
+    // https://unix.stackexchange.com/a/99134
     status += 384;
   }
   return status === 0 ? new Ok(output) : new Error([status, output]);
