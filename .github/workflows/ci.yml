@@ -18,7 +18,20 @@ jobs:
           otp-version: "24.3"
           gleam-version: "0.21.0"
 
+      - uses: charlieegan3/fetch-gh-release-binary@main
+        with:
+          owner: rome
+          repo: tools
+          version: cli/v0.5.0-next
+          asset-pattern: linux-x64
+          install-path: /usr/local/bin/rome
+          verbose: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - run: gleam format --check src test
+
+      - run: rome format --indent-style=space --ci src test
 
       - run: gleam deps download
 
