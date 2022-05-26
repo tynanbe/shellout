@@ -11,12 +11,22 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - uses: erlef/setup-beam@v1
         with:
           otp-version: "24.3"
           gleam-version: "0.21.0"
+
+      - uses: actions/checkout@v3
+        with:
+          repository: WhatsApp/erlfmt
+          path: _temp/erlfmt
+
+      - run: |
+          cd _temp/erlfmt
+          rebar3 as release escriptize
+          mv _build/release/bin/erlfmt /usr/local/bin/
 
       - uses: charlieegan3/fetch-gh-release-binary@main
         with:
@@ -30,6 +40,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - run: gleam format --check src test
+
+      - run: erlfmt --check
 
       - run: rome format --indent-style=space --ci src test
 
