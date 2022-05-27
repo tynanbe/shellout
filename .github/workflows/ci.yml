@@ -18,12 +18,23 @@ jobs:
           otp-version: "24.3"
           gleam-version: "0.21.0"
 
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
       - uses: actions/checkout@v3
         with:
           repository: WhatsApp/erlfmt
           path: _temp/erlfmt
 
-      - run: |
+      - id: cache-erlfmt
+        uses: actions/cache@v3
+        with:
+          path: /usr/local/bin/erlfmt
+          key: ${{ runner.os }}-erlfmt-${{ hashFiles('_temp/erlfmt/src/erlfmt.app.src') }}
+
+      - if: steps.cache-erlfmt.outputs.cache-hit != 'true'
+        run: |
           cd _temp/erlfmt
           rebar3 as release escriptize
           mv _build/release/bin/erlfmt /usr/local/bin/
@@ -47,12 +58,12 @@ jobs:
 
       - run: gleam deps download
 
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: build/packages
           key: ${{ runner.os }}-gleam-${{ hashFiles('**/manifest.toml') }}
           restore-keys: ${{ runner.os }}-gleam-
 
-      - run: gleam test
+      - run: gleam test --target=erlang
 
       - run: gleam test --target=javascript
