@@ -2,24 +2,15 @@ import gleam/map
 import gleam/string
 import gleeunit
 import gleeunit/should
-import shellout.{Lookups}
+import shellout.{LetBeStderr, LetBeStdout, Lookups}
 
 pub fn main() {
   gleeunit.main()
 }
 
-pub fn command_test() {
-  assert Ok(output) = shellout.command(run: "echo", with: [], in: ".", opt: [])
-  output
-  |> should.not_equal("")
+const message = "Howdy!"
 
-  assert Error(#(status, _message)) =
-    shellout.command(run: "", with: [""], in: ".", opt: [])
-  status
-  |> should.not_equal(0)
-}
-
-pub const lookups: Lookups = [
+const lookups: Lookups = [
   #(
     ["color", "background"],
     [
@@ -30,8 +21,55 @@ pub const lookups: Lookups = [
   ),
 ]
 
+pub fn arguments_test() {
+  shellout.arguments()
+  |> should.equal([])
+}
+
+pub fn command_test() {
+  let echo = shellout.command(run: "echo", with: [message], in: ".", opt: _)
+
+  assert Ok(output) = echo([])
+  output
+  |> should.not_equal("")
+
+  assert Ok(new_output) = echo([LetBeStderr])
+  new_output
+  |> should.equal(output)
+
+  assert Error(#(status, message)) =
+    shellout.command(run: "", with: [], in: ".", opt: [LetBeStdout])
+  status
+  |> should.not_equal(0)
+  should_be_without_stdout(message)
+}
+
+if erlang {
+  // Erlang ports can't separate stderr from stdout; it's all or nothing
+  fn should_be_without_stdout(message) {
+    message
+    |> should.equal("")
+  }
+}
+
+if javascript {
+  fn should_be_without_stdout(message) {
+    message
+    |> should.not_equal("")
+  }
+}
+
 pub fn style_test() {
-  let message = "Howdy!"
+  let styled =
+    message
+    |> shellout.style(with: shellout.background(["yellow"]), custom: [])
+  styled
+  |> string.starts_with(message)
+  |> should.be_false
+  styled
+  |> string.ends_with(message)
+  |> should.be_false
+
   let styled =
     message
     |> shellout.style(
@@ -47,4 +85,14 @@ pub fn style_test() {
   styled
   |> string.ends_with(message)
   |> should.be_false
+}
+
+pub fn which_test() {
+  "echo"
+  |> shellout.which
+  |> should.be_ok
+
+  ""
+  |> shellout.which
+  |> should.be_error
 }
