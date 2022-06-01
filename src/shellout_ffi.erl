@@ -13,7 +13,7 @@ os_command(Command, Args, Dir, Opts) ->
     {ExitCode, Output} =
         case Which of
             {error, WhichError} ->
-                [1, WhichError];
+                {1, WhichError};
             {ok, Executable} ->
                 ExecutableChars = binary_to_list(Executable),
                 LetBeStdout = maps:get(let_be_stdout, Opts, false),

@@ -42,6 +42,14 @@ pub fn command_test() {
   status
   |> should.not_equal(0)
   should_be_without_stdout(message)
+
+  shellout.command(
+    run: "/shouldnotexist",
+    with: [],
+    in: ".",
+    opt: [LetBeStdout],
+  )
+  |> should.be_error
 }
 
 if erlang {
@@ -73,10 +81,9 @@ pub fn style_test() {
   let styled =
     message
     |> shellout.style(
-      with: map.merge(
-        shellout.color(["pink"]),
-        shellout.display(["bold", "italic"]),
-      ),
+      with: shellout.display(["bold", "italic"])
+      |> map.merge(shellout.color(["pink"]))
+      |> map.merge(shellout.background(["brightblack"])),
       custom: lookups,
     )
   styled
