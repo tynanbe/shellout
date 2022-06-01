@@ -106,6 +106,6 @@ export function os_which(command) {
       fs.statSync(item, { throwIfNoEntry: false })?.isFile() ? item : Nil,
   ).find((item) => item !== Nil);
   return result !== Nil ? new Ok(result) : new Error(
-    `command \`${command}\` not found`,
+    `command \`${command}\` not found\n`,
   );
 }

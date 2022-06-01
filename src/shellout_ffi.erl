@@ -53,7 +53,7 @@ os_command(Command, Args, Dir, Opts) ->
             DirError = erlang:list_to_binary(
                 "The directory \"" ++
                     erlang:binary_to_list(Dir) ++
-                    "\" does not exist"
+                    "\" does not exist\n"
             ),
             {error, {ExitCode, DirError}};
         _ ->
@@ -103,7 +103,7 @@ os_which(Command) ->
                 case filelib:is_file(CommandChars) of
                     false ->
                         ExecutableError =
-                            "command `" ++ CommandChars ++ "` not found",
+                            "command `" ++ CommandChars ++ "` not found\n",
                         {error, ExecutableError};
                     true ->
                         {ok, CommandChars}
