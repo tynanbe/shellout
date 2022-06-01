@@ -89,6 +89,10 @@ export function os_command(command, args, dir, opts) {
     // https://unix.stackexchange.com/a/99134
     status += 384;
   }
+  if (status === 384 && output === "") {
+    status = 2;
+    output = `The directory "${dir}" does not exist\n`;
+  }
   return status === 0 ? new Ok(output) : new Error([status, output]);
 }
 

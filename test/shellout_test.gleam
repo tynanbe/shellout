@@ -43,13 +43,19 @@ pub fn command_test() {
   |> should.not_equal(0)
   should_be_without_stdout(message)
 
-  shellout.command(
-    run: "/shouldnotexist",
-    with: [],
-    in: ".",
-    opt: [LetBeStdout],
-  )
-  |> should.be_error
+  assert Error(#(status, message)) =
+    shellout.command(run: "dimension_x", with: [], in: ".", opt: [])
+  status
+  |> should.equal(1)
+  message
+  |> should.not_equal("")
+
+  assert Error(#(status, message)) =
+    shellout.command(run: "echo", with: [], in: "dimension_x", opt: [])
+  status
+  |> should.equal(2)
+  message
+  |> should.not_equal("")
 }
 
 if erlang {
