@@ -43,7 +43,7 @@ const Signals = {
 };
 
 export function escape(code, string) {
-  return `\x1b[${code}m${string}\x1b[0m`;
+  return `\x1b[${code}m${string}\x1b[0m\x1b[K`;
 }
 
 export function start_arguments() {

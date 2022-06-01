@@ -114,7 +114,7 @@ pub fn style(
 
 if erlang {
   fn escape(code: String, string: String) -> String {
-    string.concat(["\e[", code, "m", string, "\e[0m"])
+    string.concat(["\e[", code, "m", string, "\e[0m\e[K"])
   }
 }
 
