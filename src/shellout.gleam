@@ -8,22 +8,59 @@ if erlang {
   import gleam/erlang
 }
 
-/// TODO
+/// A list of tuples in which the first element of each tuple is a label and the
+/// second element is a list of one or more number strings representing a
+/// singular ANSI style.
+///
+/// ANSI styles are split into three categories, labeled `"display"`, `"color"`,
+/// and `"background"`, primarily so a single color `Lookup` can work with both
+/// foreground and background.
+///
+/// ## Examples
+///
+/// See the [`displays`](#displays) and [`colors`](#colors) constants, and the
+/// [`Lookups`](#Lookups) type.
 ///
 pub type Lookup =
   List(#(String, List(String)))
 
-/// TODO
+/// A list of tuples in which the first element of each tuple is a list of
+/// [`Lookup`](#Lookup) labels and the second element is a [`Lookup`](#Lookup).
+///
+/// `Lookups` allow for customization, adding new styles to the specified
+/// [`Lookup`](#Lookup) categories.
+///
+/// ## Examples
+///
+/// ```gleam
+/// pub const lookups: Lookups = [
+///   #(
+///     ["color", "background"],
+///     [
+///       #("buttercup", ["252", "226", "174"]),
+///       #("mint", ["182", "255", "234"]),
+///       #("pink", ["255", "175", "243"]),
+///     ],
+///   ),
+/// ]
+/// ```
 ///
 pub type Lookups =
   List(#(List(String), Lookup))
 
-/// TODO
+/// A map in which the keys are style categories, `"display"`, `"color"`, or
+/// `"background"`, and the values are lists of style labels found within a
+/// [`Lookup`](#Lookup).
+///
+/// ## Examples
+///
+/// See the [`display`](#display), [`color`](#color), and
+/// [`background`](#background) functions.
 ///
 pub type StyleFlags =
   Map(String, List(String))
 
-/// TODO
+/// A list of ANSI styles representing non-color display effects.
 ///
 pub const displays: Lookup = [
   #("reset", ["0"]),
@@ -45,7 +82,8 @@ pub const displays: Lookup = [
   #("nostrike", ["29"]),
 ]
 
-/// TODO
+/// A list of ANSI styles representing the basic 16 terminal colors, 8 standard
+/// and 8 bright.
 ///
 pub const colors: Lookup = [
   #("black", ["30"]),
@@ -67,25 +105,89 @@ pub const colors: Lookup = [
   #("brightwhite", ["97"]),
 ]
 
-/// TODO
+/// Converts a list of `"display"` style labels into a
+/// [`StyleFlags`](#StyleFlags).
+///
+/// ## Examples
+///
+/// ```gleam
+/// > style(
+/// >   "radical",
+/// >   with: display(["bold", "italic", "tubular"]),
+/// >   custom: [],
+/// > )
+/// "\e[1;3mradical\e[0m\e[K"
+/// ```
 ///
 pub fn display(values: List(String)) -> StyleFlags {
   map.from_list([#("display", values)])
 }
 
-/// TODO
+/// Converts a list of `"color"` style labels into a
+/// [`StyleFlags`](#StyleFlags).
+///
+/// ## Examples
+///
+/// ```gleam
+/// > style(
+/// >   "uh...",
+/// >   with: color(["yellow", "brightgreen", "gnarly"]),
+/// >   custom: [],
+/// > )
+/// "\e[33;92muh...\e[0m\e[K"
+/// ```
 ///
 pub fn color(values: List(String)) -> StyleFlags {
   map.from_list([#("color", values)])
 }
 
-/// TODO
+/// Converts a list of `"background"` style labels into a
+/// [`StyleFlags`](#StyleFlags).
+///
+/// ## Examples
+///
+/// ```gleam
+/// > style(
+/// >   "awesome",
+/// >   with: background(["yellow", "brightgreen", "bodacious"]),
+/// >   custom: [],
+/// > )
+/// "\e[43;102mawesome\e[0m\e[K"
+/// ```
 ///
 pub fn background(values: List(String)) -> StyleFlags {
   map.from_list([#("background", values)])
 }
 
-/// TODO
+/// Applies ANSI styles to a string, resetting styling at the end.
+///
+/// If a style label isn't found within a [`Lookup`](#Lookup) associated with
+/// the corresponding [`StyleFlags`](#StyleFlags) key's category, that label is
+/// silently ignored.
+///
+/// ## Examples
+///
+/// ```gleam
+/// > import gleam/map
+/// > pub const lookups: Lookups = [
+/// >   #(
+/// >     ["color", "background"],
+/// >     [
+/// >       #("buttercup", ["252", "226", "174"]),
+/// >       #("mint", ["182", "255", "234"]),
+/// >       #("pink", ["255", "175", "243"]),
+/// >     ],
+/// >   ),
+/// > ]
+/// > style(
+/// >   "cowabunga",
+/// >   with: display(["bold", "italic", "awesome"])
+/// >   |> map.merge(color(["pink", "righteous"]))
+/// >   |> map.merge(background(["brightblack", "excellent"])),
+/// >   custom: lookups,
+/// > )
+/// "\e[1;3;38;2;255;175;243;100mcowabunga\e[0m\e[K"
+/// ```
 ///
 pub fn style(
   string: String,
@@ -212,7 +314,22 @@ fn do_style(lookup: Lookup, strings: List(String), flag: String) -> List(String)
   |> list.flatten
 }
 
-/// TODO
+/// Retrieves a list of strings corresponding to any extra arguments passed when
+/// invoking a runtime—via `gleam run`, for example.
+///
+/// ## Examples
+///
+/// ```gleam
+/// // $ gleam run -- pizza --order=5 --anchovies=false
+/// > arguments()
+/// ["pizza", "--order=5", "--anchovies=false"]
+/// ```
+///
+/// ```gleam
+/// // $ gleam run --target=javascript
+/// > arguments()
+/// []
+/// ```
 ///
 pub fn arguments() -> List(String) {
   do_arguments()
@@ -229,31 +346,87 @@ if javascript {
     "./shellout_ffi.mjs" "start_arguments"
 }
 
-/// TODO
+/// Options for controlling the behavior of [`command`](#command).
 ///
 pub type CommandOpt {
-  // TODO
+  /// Don't capture the standard error stream, let it behave as usual.
+  ///
   LetBeStderr
-  // TODO
-  // Implies LetBeStderr with the Erlang target.
+  /// Don't capture the standard output stream, let it behave as usual.
+  ///
+  /// When targeting Erlang, this option also implies `LetBeStderr`.
+  ///
+  /// When targeting JavaScript, this option also enables `SIGINT` (`Ctrl+C`) to
+  /// pass through to the spawned process.
+  ///
   LetBeStdout
-  // TODO
+  /// Overlap the standard input and output streams.
+  ///
+  /// This option is specific to the Windows platform and otherwise ignored;
+  /// however, when targeting JavaScript, this option prevents the standard
+  /// input stream from behaving as usual.
+  ///
   OverlappedStdio
 }
 
-/// TODO
+/// Results in any output captured from the given `executable` on success, or an
+/// `Error` on failure.
 ///
-/// By default, `stdout` is captured, and `stderr` is redirested to `stdin`.
+/// An `Error` result wraps a tuple in which the first element is an OS error
+/// status code and the second is a message about what went wrong (or an empty
+/// string).
 ///
-/// With the JavaScript target, `stdin` is handled in
-/// [raw mode](https://www.wikiwand.com/en/Terminal_mode). With the Erlang
-/// target `stdin` is always handled in
+/// The `executable` is given `arguments` and run from within the given
+/// `directory`.
+///
+/// Any number of [`CommandOpt`](#CommandOpt) options can be given to alter the
+/// behavior of this function.
+///
+/// The standard error stream is by default redirected to the standard output
+/// stream, and both are captured. When targeting JavaScript, anything captured
+/// from the standard error stream is appended to anything captured from the
+/// standard output stream.
+///
+/// The standard input stream is by default handled in
+/// [raw mode](https://www.wikiwand.com/en/Terminal_mode) when targeting
+/// JavaScript, allowing full interaction with the spawned process. When
+/// targeting Erlang, however, it's always handled in
 /// [cooked mode](https://www.wikiwand.com/en/Terminal_mode).
 ///
-/// Note that while `shellout` aims for near feature parity between compilation
-/// targets, more advanced configurations are possible by using Node.js's
-/// [`child_process`](https://nodejs.org/api/child_process.html) functions
-/// directly.
+/// Note that while `shellout` aims for near feature parity between runtimes,
+/// some discrepancies exist and are documented herein.
+///
+/// ## Examples
+///
+/// ```gleam
+/// > command(run: "echo", with: ["-n", "Cool!"], in: ".", opt: [])
+/// Ok("Cool!")
+/// ```
+///
+/// ```gleam
+/// > command(run: "echo", with: ["Cool!"], in: ".", opt: [LetBeStdout])
+/// // Cool!
+/// Ok("")
+/// ```
+///
+/// ```gleam
+/// // $ stat -c '%a %U %n' /tmp/dimension_x
+/// // 700 root /tmp/dimension_x
+/// > command(run: "ls", with: ["dimension_x"], in: "/tmp", opt: [])
+/// Error(#(2, "ls: cannot open directory 'dimension_x': Permission denied\n"))
+/// ```
+///
+/// ```gleam
+/// > command(run: "dimension_X", with: [], in: ".", opt: [])
+/// Error(#(1, "command `dimension_x` not found\n"))
+/// ```
+///
+/// ```gleam
+/// // $ ls -p
+/// // gleam.toml  manifest.toml  src/  test/
+/// > command(run: "echo", with: [], in: "dimension_x", opt: [])
+/// Error(#(2, "The directory \"dimension_x\" does not exist\n"))
+/// ```
 ///
 pub fn command(
   run executable: String,
@@ -287,7 +460,25 @@ if javascript {
     "./shellout_ffi.mjs" "os_command"
 }
 
-/// TODO
+/// Halts the runtime and passes the given `status` code to the operating
+/// system.
+///
+/// A `status` code of `0` typically indicates success, while any other integer
+/// represents an error.
+///
+/// ## Examples
+///
+/// ```gleam
+/// // $ gleam run && echo "Pizza time!"
+/// > exit(0)
+/// // Pizza time!
+/// ```
+///
+/// ```gleam
+/// // $ gleam run || echo "Ugh, shell shock ..."
+/// > exit(1)
+/// // Ugh, shell shock ...
+/// ```
 ///
 pub fn exit(status: Int) -> Nil {
   do_exit(status)
@@ -303,9 +494,27 @@ if javascript {
     "" "process.exit"
 }
 
-/// TODO
+/// Results in a path to the given `executable` on success, or an `Error` when
+/// no such path is found.
 ///
-pub fn which(executable: String) {
+/// ## Examples
+///
+/// ```gleam
+/// > which("echo")
+/// Ok("/sbin/echo")
+/// ```
+///
+/// ```gleam
+/// > which("./priv/party")
+/// Ok("./priv/party")
+/// ```
+///
+/// ```gleam
+/// > which("dimension_x")
+/// Error("command `dimension_x` not found")
+/// ```
+///
+pub fn which(executable: String) -> Result(String, String) {
   do_which(executable)
 }
 

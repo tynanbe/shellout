@@ -44,10 +44,9 @@ pub fn main() {
     Error(#(status, message)) -> {
       message
       |> shellout.style(
-        with: map.merge(
-          shellout.color(["pink"]),
-          shellout.display(["bold", "italic"]),
-        ),
+        with: shellout.display(["bold", "italic"])
+        |> map.merge(shellout.color(["pink"]))
+        |> map.merge(shellout.background(["brightblack"])),
         custom: lookups,
       )
       |> io.print
