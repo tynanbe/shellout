@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.0.0 - UNRELEASED
+## v1.0.0 - 2022-06-01
 
 - Complete rewrite!
 - The new `shellout` module gains the `CommandOpt`, `Lookup`, `Lookups`, and
