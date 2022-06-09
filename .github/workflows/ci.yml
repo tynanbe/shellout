@@ -15,7 +15,7 @@ jobs:
 
       - uses: erlef/setup-beam@v1
         with:
-          otp-version: "24.3"
+          otp-version: "25.0"
           gleam-version: "0.21.0"
 
       - uses: actions/setup-node@v3
@@ -43,7 +43,7 @@ jobs:
         with:
           owner: rome
           repo: tools
-          version: cli/v0.5.0-next
+          version: cli/v0.6.1-next
           asset-pattern: linux-x64
           install-path: /usr/local/bin/rome
           verbose: true
@@ -54,7 +54,7 @@ jobs:
 
       - run: erlfmt --check
 
-      - run: rome format --indent-style=space --ci src test
+      - run: rome ci --indent-style=space src test
 
       - run: gleam deps download
 
