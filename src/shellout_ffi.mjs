@@ -52,8 +52,9 @@ export function start_arguments() {
 
 export function os_command(command, args, dir, opts) {
   let executable = os_which(command);
-  executable =
-    executable.isOk() ? executable : os_which(path.join(dir, command));
+  executable = executable.isOk() ? executable : os_which(
+    path.join(dir, command),
+  );
   if (!executable.isOk()) {
     return new Error([1, executable[0]]);
   }

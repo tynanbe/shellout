@@ -43,7 +43,7 @@ jobs:
         with:
           owner: rome
           repo: tools
-          version: cli/v0.6.1-next
+          version: cli/v0.7.0-next
           asset-pattern: linux-x64
           install-path: /usr/local/bin/rome
           verbose: true
