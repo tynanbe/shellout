@@ -13,7 +13,7 @@ href = "https://gleam.run/"
 title = "Website"
 
 [dependencies]
-gleam_erlang = "~> 0.9"
+gleam_erlang = "~> 0.17"
 gleam_stdlib = "~> 0.21"
 
 [dev-dependencies]

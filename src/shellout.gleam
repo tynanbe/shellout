@@ -342,7 +342,15 @@ if erlang {
 }
 
 if javascript {
-  external fn do_arguments() -> List(String) =
+  fn do_arguments() -> List(String) {
+    do_arguments_ffi()
+		// This is a work around around a bug introduced in 0.26.0:
+    |> list.filter(fn(arg) {
+      arg != "--" && string.ends_with(arg, "/gleam.main.mjs") == False
+    })
+  }
+
+  external fn do_arguments_ffi() -> List(String) =
     "./shellout_ffi.mjs" "start_arguments"
 }
 
