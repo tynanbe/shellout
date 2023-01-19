@@ -108,3 +108,7 @@ end
   {shellout, "1.0.0"}
 ]}.
 ```
+
+## Requirements
+
+- Gleam 0.26.0.

@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Upgraded deps
+- Set minimum Gleam version to 0.26.0
+- Allowed shellout to work with Deno
+
 ## v1.0.0 - 2022-06-01
 
 - Complete rewrite!
