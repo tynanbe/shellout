@@ -344,7 +344,7 @@ if erlang {
 if javascript {
   fn do_arguments() -> List(String) {
     do_arguments_ffi()
-		// This is a work around around a bug introduced in 0.26.0:
+    // This is a work around around a bug introduced in 0.26.0:
     |> list.filter(fn(arg) {
       arg != "--" && string.ends_with(arg, "/gleam.main.mjs") == False
     })
