@@ -10,4 +10,4 @@ packages = [
 [requirements]
 gleam_erlang = "~> 0.17"
 gleam_stdlib = "~> 0.21"
-gleeunit = "~> 0.6"
+gleeunit = "~> 0.10"

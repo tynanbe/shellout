@@ -3,6 +3,7 @@ import { LetBeStderr, LetBeStdout, OverlappedStdio } from "./shellout.mjs";
 import * as child_process from "child_process";
 import * as fs from "fs";
 import * as path from "path";
+import * as process from "process";
 
 const Nil = undefined;
 const Signals = {

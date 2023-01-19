@@ -17,4 +17,13 @@ gleam_erlang = "~> 0.17"
 gleam_stdlib = "~> 0.21"
 
 [dev-dependencies]
-gleeunit = "~> 0.6"
+gleeunit = "~> 0.10"
+
+[javascript.deno]
+allow_read = [
+	"./",
+  "./build",
+  "./gleam.toml",
+  "./src",
+  "./test",
+]
