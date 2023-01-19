@@ -84,7 +84,7 @@ pub fn main() {
 
 ```toml
 [dependencies]
-shellout = "~> 1.0"
+shellout = "~> 1.0.1"
 ```
 
 ### As a dependency of your Mix project
@@ -94,7 +94,7 @@ shellout = "~> 1.0"
 ```elixir
 defp deps do
   [
-    {:shellout, "~> 1.0"},
+    {:shellout, "~> 1.0.1"},
   ]
 end
 ```
@@ -105,7 +105,7 @@ end
 
 ```erlang
 {deps, [
-  {shellout, "1.0.0"}
+  {shellout, "1.0.1"}
 ]}.
 ```
 
