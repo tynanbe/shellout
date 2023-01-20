@@ -1,9 +1,9 @@
 import { Error, Ok, toList } from "./gleam.mjs";
 import { LetBeStderr, LetBeStdout, OverlappedStdio } from "./shellout.mjs";
-import * as child_process from "child_process";
-import * as fs from "fs";
-import * as path from "path";
-import * as process from "process";
+import * as NodeChildProcess from "child_process";
+import * as NodeFs from "fs";
+import * as NodePath from "path";
+import * as NodeProcess from "process";
 
 const Nil = undefined;
 const Signals = {
@@ -48,13 +48,13 @@ export function escape(code, string) {
 }
 
 export function start_arguments() {
-  return toList(process.argv.slice(1));
+  return toList(NodeProcess.argv.slice(1));
 }
 
 export function os_command(command, args, dir, opts) {
   let executable = os_which(command);
   executable = executable.isOk() ? executable : os_which(
-    path.join(dir, command),
+    NodePath.join(dir, command),
   );
   if (!executable.isOk()) {
     return new Error([1, executable[0]]);
@@ -76,11 +76,11 @@ export function os_command(command, args, dir, opts) {
   }
   if (getBool(opts, new LetBeStdout())) {
     // Pass Ctrl+C to spawned process.
-    process.on("SIGINT", () => Nil);
+    NodeProcess.on("SIGINT", () => Nil);
     stdout = "inherit";
   }
   spawnOpts.stdio = [stdin, stdout, stderr];
-  let result = child_process.spawnSync(command, args.toArray(), spawnOpts);
+  let result = NodeChildProcess.spawnSync(command, args.toArray(), spawnOpts);
   let output = result.stdout ? result.stdout.toString() : "";
   output += result.stderr ? result.stderr.toString() : "";
   let status = result.status;
@@ -99,17 +99,17 @@ export function os_command(command, args, dir, opts) {
 }
 
 export function os_which(command) {
-  let pathexts = (process.env.PATHEXT || "").split(";");
-  let paths = (process.env.PATH || "")
+  let pathexts = (NodeProcess.env.PATHEXT || "").split(";");
+  let paths = (NodeProcess.env.PATH || "")
     .replace(/"+/g, "")
-    .split(path.delimiter)
+    .split(NodePath.delimiter)
     .filter(Boolean)
-    .map((item) => path.join(item, command))
+    .map((item) => NodePath.join(item, command))
     .concat([command])
     .flatMap((item) => pathexts.map((ext) => item + ext));
   let result = paths.map(
     (item) =>
-      fs.statSync(item, { throwIfNoEntry: false })?.isFile() ? item : Nil,
+      NodeFs.statSync(item, { throwIfNoEntry: false })?.isFile() ? item : Nil,
   ).find((item) => item !== Nil);
   return result !== Nil ? new Ok(result) : new Error(
     `command \`${command}\` not found\n`,
