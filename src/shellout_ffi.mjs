@@ -76,7 +76,7 @@ export function os_command(command, args, dir, opts) {
   }
   if (getBool(opts, new LetBeStdout())) {
     // Pass Ctrl+C to spawned process.
-    NodeProcess.on("SIGINT", () => Nil);
+    process.on("SIGINT", () => Nil);
     stdout = "inherit";
   }
   spawnOpts.stdio = [stdin, stdout, stderr];
