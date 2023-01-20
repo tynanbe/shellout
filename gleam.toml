@@ -21,7 +21,7 @@ gleeunit = "~> 0.10"
 
 [javascript.deno]
 allow_read = [
-	"./",
+  "./",
   "./build",
   "./gleam.toml",
   "./src",
