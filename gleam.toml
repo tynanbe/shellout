@@ -14,7 +14,7 @@ title = "Website"
 
 [dependencies]
 gleam_erlang = "~> 0.9"
-gleam_stdlib = "~> 0.21"
+gleam_stdlib = "~> 0.26"
 
 [dev-dependencies]
 gleeunit = "~> 0.6"
