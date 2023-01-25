@@ -15,12 +15,13 @@ jobs:
 
       - uses: erlef/setup-beam@v1
         with:
-          otp-version: "25.0"
-          gleam-version: "0.21.0"
+          otp-version: "25.1"
+          rebar3-version: "3"
+          gleam-version: "0.26.1"
 
       - uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 18
 
       - uses: actions/checkout@v3
         with:
