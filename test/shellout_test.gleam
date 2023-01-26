@@ -52,8 +52,10 @@ pub fn command_test() {
 
   assert Error(#(status, message)) =
     shellout.command(run: "echo", with: [], in: "dimension_x", opt: [])
+
   status
   |> should.equal(2)
+
   message
   |> should.not_equal("")
 }
