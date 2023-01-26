@@ -20,6 +20,6 @@ gleam_stdlib = "~> 0.26"
 gleeunit = "~> 0.10"
 
 [javascript.deno]
-allow_read = [
-  "./",
-]
+allow_env = true
+allow_read = true
+allow_run = true
