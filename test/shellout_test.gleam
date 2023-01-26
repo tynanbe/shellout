@@ -1,3 +1,4 @@
+import gleam/io
 import gleam/map
 import gleam/string
 import gleeunit
@@ -39,19 +40,25 @@ pub fn command_test() {
 
   assert Error(#(status, message)) =
     shellout.command(run: "", with: [], in: ".", opt: [LetBeStdout])
+
   status
   |> should.not_equal(0)
+
   should_be_without_stdout(message)
 
   assert Error(#(status, message)) =
     shellout.command(run: "dimension_x", with: [], in: ".", opt: [])
+
   status
   |> should.equal(1)
+
   message
   |> should.not_equal("")
 
   assert Error(#(status, message)) =
     shellout.command(run: "echo", with: [], in: "dimension_x", opt: [])
+
+  io.debug(Error(#(status, message)))
 
   status
   |> should.equal(2)
@@ -79,9 +86,11 @@ pub fn style_test() {
   let styled =
     message
     |> shellout.style(with: shellout.background(["yellow"]), custom: [])
+
   styled
   |> string.starts_with(message)
   |> should.be_false
+
   styled
   |> string.ends_with(message)
   |> should.be_false
@@ -94,9 +103,11 @@ pub fn style_test() {
       |> map.merge(shellout.background(["brightblack"])),
       custom: lookups,
     )
+
   styled
   |> string.starts_with(message)
   |> should.be_false
+
   styled
   |> string.ends_with(message)
   |> should.be_false
