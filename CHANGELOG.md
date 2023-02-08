@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v1.1.0 - 2023-02-08
 
 - Shellout now supports the Deno JavaScript runtime (v1.30 or later).
 

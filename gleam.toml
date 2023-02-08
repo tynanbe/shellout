@@ -1,5 +1,5 @@
 name = "shellout"
-version = "1.1.0-dev"
+version = "1.1.0"
 description = "A Gleam library for cross-platform shell operations"
 licences = ["Apache-2.0"]
 
