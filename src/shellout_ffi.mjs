@@ -1,8 +1,9 @@
 import { Error, Ok, toList } from "./gleam.mjs";
 import { LetBeStderr, LetBeStdout, OverlappedStdio } from "./shellout.mjs";
-import * as child_process from "child_process";
-import * as fs from "fs";
-import * as path from "path";
+import * as child_process from "node:child_process";
+import * as fs from "node:fs";
+import * as path from "node:path";
+import process from "node:process";
 
 const Nil = undefined;
 const Signals = {
@@ -47,7 +48,7 @@ export function escape(code, string) {
 }
 
 export function start_arguments() {
-  return toList(process.argv.slice(1));
+  return toList(process.argv.slice(2));
 }
 
 export function os_command(command, args, dir, opts) {
@@ -80,6 +81,9 @@ export function os_command(command, args, dir, opts) {
   }
   spawnOpts.stdio = [stdin, stdout, stderr];
   let result = child_process.spawnSync(command, args.toArray(), spawnOpts);
+  if (result.error) {
+    result = { status: null };
+  }
   let output = result.stdout ? result.stdout.toString() : "";
   output += result.stderr ? result.stderr.toString() : "";
   let status = result.status;

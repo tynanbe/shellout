@@ -1,0 +1,8 @@
+{
+  "tasks": {
+    "check": "deno run --allow-run bin/task.ts check",
+    "format": "deno run --allow-run bin/task.ts format",
+    "test": "deno run --allow-run bin/task.ts test",
+    "watch": "watchexec --ignore=.git --ignore=build --no-shell --postpone --watch-when-idle -- deno task test"
+  }
+}

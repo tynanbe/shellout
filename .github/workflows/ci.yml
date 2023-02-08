@@ -15,9 +15,20 @@ jobs:
 
       - uses: erlef/setup-beam@v1
         with:
-          otp-version: "25.1"
+          otp-version: "25.2"
           rebar3-version: "3"
-          gleam-version: "0.26.1"
+          gleam-version: "0.26.2"
+
+      - uses: denoland/setup-deno@v1
+        with:
+          deno-version: "v1.x"
+
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.deno
+            ~/.cache/deno
+          key: ${{ runner.os }}-deno-${{ hashFiles('deno.lock') }}
 
       - uses: actions/setup-node@v3
         with:
@@ -34,37 +45,23 @@ jobs:
           path: /usr/local/bin/erlfmt
           key: ${{ runner.os }}-erlfmt-${{ hashFiles('_temp/erlfmt/src/erlfmt.app.src') }}
 
-      - if: steps.cache-erlfmt.outputs.cache-hit != 'true'
+      - if: ${{ !steps.cache-erlfmt.outputs.cache-hit }}
         run: |
           cd _temp/erlfmt
           rebar3 as release escriptize
           mv _build/release/bin/erlfmt /usr/local/bin/
 
-      - uses: charlieegan3/fetch-gh-release-binary@main
-        with:
-          owner: rome
-          repo: tools
-          version: cli/v0.7.0-next
-          asset-pattern: linux-x64
-          install-path: /usr/local/bin/rome
-          verbose: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - run: gleam format --check src test
-
-      - run: erlfmt --check
-
-      - run: rome ci --indent-style=space src test
-
-      - run: gleam deps download
-
-      - uses: actions/cache@v3
+      - id: cache-gleam
+        uses: actions/cache@v3
         with:
           path: build/packages
-          key: ${{ runner.os }}-gleam-${{ hashFiles('**/manifest.toml') }}
-          restore-keys: ${{ runner.os }}-gleam-
+          key: ${{ runner.os }}-gleam-${{ hashFiles('manifest.toml') }}
 
-      - run: gleam test --target=erlang
+      - if: ${{ !steps.cache-gleam.outputs.cache-hit }}
+        run: gleam deps download
 
-      - run: gleam test --target=javascript
+      - run: deno task check
+
+      - run: deno task format --check
+
+      - run: deno task test

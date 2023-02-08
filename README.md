@@ -3,7 +3,7 @@
 [![Hex Package](https://img.shields.io/hexpm/v/shellout?color=ffaff3&label=%F0%9F%93%A6)](https://hex.pm/packages/shellout)
 [![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3?label=%F0%9F%93%9A)](https://hexdocs.pm/shellout/)
 [![License](https://img.shields.io/hexpm/l/shellout?color=ffaff3&label=%F0%9F%93%83)](https://github.com/tynanbe/shellout/blob/main/LICENSE)
-[![Build](https://img.shields.io/github/workflow/status/tynanbe/shellout/CI?color=ffaff3&label=%E2%9C%A8)](https://github.com/tynanbe/shellout/actions)
+[![Build](https://img.shields.io/github/actions/workflow/status/tynanbe/shellout/ci.yml?branch=main&color=ffaff3&label=%E2%9C%A8)](https://github.com/tynanbe/shellout/actions)
 
 A Gleam library for cross-platform shell operations.
 
