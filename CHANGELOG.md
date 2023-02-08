@@ -2,7 +2,6 @@
 
 ## Unreleased
 
-- Shellout now requires Gleam v0.26 or later.
 - Shellout now supports the Deno JavaScript runtime (v1.30 or later).
 
 ## v1.0.0 - 2022-06-01

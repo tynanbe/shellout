@@ -21,9 +21,25 @@ const lookups: Lookups = [
   ),
 ]
 
-pub fn arguments_test() {
-  shellout.arguments()
-  |> should.equal([])
+if erlang {
+  pub fn arguments_test() {
+    shellout.arguments()
+    |> should.equal([])
+  }
+}
+
+if javascript {
+  pub fn arguments_test() {
+    case shellout.arguments() {
+      [entrypoint] ->
+        // JavaScript gets an extra argument for its test module entrypoint
+        // since Gleam v0.26
+        entrypoint
+        |> string.ends_with("/shellout/gleam.main.mjs")
+        |> should.be_true
+      _else -> Nil
+    }
+  }
 }
 
 pub fn command_test() {

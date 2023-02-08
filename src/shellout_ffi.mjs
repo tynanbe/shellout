@@ -48,7 +48,7 @@ export function escape(code, string) {
 }
 
 export function start_arguments() {
-  return toList(process.argv.slice(2));
+  return toList(process.argv.slice(1));
 }
 
 export function os_command(command, args, dir, opts) {

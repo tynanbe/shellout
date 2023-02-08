@@ -8,6 +8,6 @@ packages = [
 ]
 
 [requirements]
-gleam_erlang = "~> 0.18"
-gleam_stdlib = "~> 0.26"
+gleam_erlang = "~> 0.9"
+gleam_stdlib = "~> 0.21"
 gleeunit = "~> 0.10"
