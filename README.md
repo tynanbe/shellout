@@ -104,6 +104,6 @@ end
 
 ```erlang
 {deps, [
-  {shellout, "1.1.0"}
+  {shellout, "1.1.1"}
 ]}.
 ```

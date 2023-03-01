@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v1.1.1 - 2023-03-01
 
 - Fixed a bug where `command` did not behave as expected with the Deno
   JavaScript runtime.
