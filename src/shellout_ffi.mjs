@@ -48,7 +48,7 @@ export function escape(code, string) {
 }
 
 export function start_arguments() {
-  return toList(process.argv.slice(1));
+  return toList(globalThis.Deno?.args ?? process.argv.slice(1));
 }
 
 export function os_command(command, args, dir, opts) {
@@ -64,11 +64,15 @@ export function os_command(command, args, dir, opts) {
     let result = map.get(key);
     return result.isOk() ? result[0] : false;
   };
+
+  let isDeno = Boolean(globalThis.Deno?.Command);
+
+  args = args.toArray();
   let stdin = "inherit";
-  let stdout = "pipe";
-  let stderr = "pipe";
+  let stdout = isDeno ? "piped" : "pipe";
+  let stderr = stdout;
   let spawnOpts = { cwd: dir, windowsHide: true };
-  if (getBool(opts, new OverlappedStdio())) {
+  if (!isDeno && getBool(opts, new OverlappedStdio())) {
     stdin = stdout = "overlapped";
   }
   if (getBool(opts, new LetBeStderr())) {
@@ -79,26 +83,55 @@ export function os_command(command, args, dir, opts) {
     process.on("SIGINT", () => Nil);
     stdout = "inherit";
   }
-  spawnOpts.stdio = [stdin, stdout, stderr];
-  let result = child_process.spawnSync(command, args.toArray(), spawnOpts);
+
+  let result = {};
+  if (isDeno) {
+    spawnOpts = {
+      ...spawnOpts,
+      args,
+      stdin,
+      stdout,
+      stderr,
+    };
+    try {
+      result = new Deno.Command(command, spawnOpts).outputSync();
+    } catch {}
+    result.status = result.code ?? null;
+  } else {
+    spawnOpts.stdio = [stdin, stdout, stderr];
+    result = child_process.spawnSync(command, args, spawnOpts);
+  }
   if (result.error) {
     result = { status: null };
   }
-  let output = result.stdout ? result.stdout.toString() : "";
-  output += result.stderr ? result.stderr.toString() : "";
+
+  let output = "";
+  try {
+    output = new TextDecoder().decode(result.stdout);
+  } catch {}
+  try {
+    output += new TextDecoder().decode(result.stderr);
+  } catch {}
+
   let status = result.status;
-  if (status === null) {
+  if (null === status) {
     let signal = Signals[result.signal];
-    status = signal !== Nil ? signal : 0;
+    status = Nil !== signal ? signal : 0;
     // `yash`-like status
     // https://unix.stackexchange.com/a/99134
     status += 384;
   }
-  if (status === 384 && output === "") {
+
+  if (384 === status && "" === output) {
     status = 2;
     output = `The directory "${dir}" does not exist\n`;
   }
-  return status === 0 ? new Ok(output) : new Error([status, output]);
+
+  return 0 === status ? new Ok(output) : new Error([status, output]);
+}
+
+export function os_exit(status) {
+  process.exit(status);
 }
 
 export function os_which(command) {

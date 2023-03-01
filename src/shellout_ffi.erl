@@ -1,6 +1,6 @@
 -module(shellout_ffi).
 
--export([os_command/4, os_which/1]).
+-export([os_command/4, os_exit/1, os_which/1]).
 
 os_command(Command, Args, Dir, Opts) ->
     Which =
@@ -43,16 +43,16 @@ os_command(Command, Args, Dir, Opts) ->
                 {Status, OutputChars} = get_data(Port, []),
                 case LetBeStdout of
                     true -> {Status, <<>>};
-                    _ -> {Status, erlang:list_to_binary(OutputChars)}
+                    _ -> {Status, list_to_binary(OutputChars)}
                 end
         end,
     case ExitCode of
         0 ->
             {ok, Output};
         2 when Output == <<>> ->
-            DirError = erlang:list_to_binary(
+            DirError = list_to_binary(
                 "The directory \"" ++
-                    erlang:binary_to_list(Dir) ++
+                    binary_to_list(Dir) ++
                     "\" does not exist\n"
             ),
             {error, {ExitCode, DirError}};
@@ -64,7 +64,7 @@ get_data(Port, SoFar) ->
     receive
         {Port, {data, {Flag, Bytes}}} ->
             io:format("~ts", [
-                erlang:list_to_binary(
+                list_to_binary(
                     case Flag of
                         eol -> [Bytes, $\n];
                         noeol -> [Bytes]
@@ -95,8 +95,11 @@ get_data(Port, SoFar) ->
             {ExitCode, lists:flatten(SoFar)}
     end.
 
+os_exit(Status) ->
+    halt(Status).
+
 os_which(Command) ->
-    CommandChars = erlang:binary_to_list(Command),
+    CommandChars = binary_to_list(Command),
     {Result, OutputChars} =
         case os:find_executable(CommandChars) of
             false ->
@@ -111,4 +114,4 @@ os_which(Command) ->
             Executable ->
                 {ok, Executable}
         end,
-    {Result, erlang:list_to_binary(OutputChars)}.
+    {Result, list_to_binary(OutputChars)}.

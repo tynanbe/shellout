@@ -486,12 +486,12 @@ pub fn exit(status: Int) -> Nil {
 
 if erlang {
   external fn do_exit(status: Int) -> Nil =
-    "erlang" "halt"
+    "shellout_ffi" "os_exit"
 }
 
 if javascript {
   external fn do_exit(status: Int) -> Nil =
-    "" "process.exit"
+    "./shellout_ffi.mjs" "os_exit"
 }
 
 /// Results in a path to the given `executable` on success, or an `Error` when

@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Fixed a bug where `command` did not behave as expected with the Deno
+  JavaScript runtime.
+- Fixed a bug where `start_arguments` did not behave as expected with the Deno
+  JavaScript runtime.
+
 ## v1.1.0 - 2023-02-08
 
 - Shellout now supports the Deno JavaScript runtime (v1.30 or later).
