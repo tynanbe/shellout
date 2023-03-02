@@ -45,28 +45,28 @@ if javascript {
 pub fn command_test() {
   let echo = shellout.command(run: "echo", with: [message], in: ".", opt: _)
 
-  assert Ok(output) = echo([])
+  let assert Ok(output) = echo([])
   output
   |> should.not_equal("")
 
-  assert Ok(new_output) = echo([LetBeStderr])
+  let assert Ok(new_output) = echo([LetBeStderr])
   new_output
   |> should.equal(output)
 
-  assert Error(#(status, message)) =
+  let assert Error(#(status, message)) =
     shellout.command(run: "", with: [], in: ".", opt: [LetBeStdout])
   status
   |> should.not_equal(0)
   should_be_without_stdout(message)
 
-  assert Error(#(status, message)) =
+  let assert Error(#(status, message)) =
     shellout.command(run: "dimension_x", with: [], in: ".", opt: [])
   status
   |> should.equal(1)
   message
   |> should.not_equal("")
 
-  assert Error(#(status, message)) =
+  let assert Error(#(status, message)) =
     shellout.command(run: "echo", with: [], in: "dimension_x", opt: [])
   status
   |> should.equal(2)

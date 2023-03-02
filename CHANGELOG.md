@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Shellout now requires Gleam v0.27 or later.
+
 ## v1.1.1 - 2023-03-01
 
 - Fixed a bug where `command` did not behave as expected with the Deno

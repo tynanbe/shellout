@@ -196,7 +196,7 @@ pub fn style(
 ) -> String {
   ["display", "color", "background"]
   |> list.map(with: fn(flag) {
-    try strings = map.get(flags, flag)
+    use strings <- result.then(map.get(flags, flag))
     lookups
     |> list.filter_map(with: fn(item) {
       let #(keys, lookup) = item
@@ -243,8 +243,8 @@ fn do_style(lookup: Lookup, strings: List(String), flag: String) -> List(String)
         colors
         |> map.from_list
         |> map.map_values(with: fn(_key, code) {
-          assert [code] = code
-          assert Ok(code) = int.parse(code)
+          let assert [code] = code
+          let assert Ok(code) = int.parse(code)
           [int.to_string(code + 10)]
         })
     }

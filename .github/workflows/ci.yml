@@ -17,7 +17,7 @@ jobs:
         with:
           otp-version: "25.2"
           rebar3-version: "3"
-          gleam-version: "0.26.2"
+          gleam-version: "0.27.0"
 
       - uses: denoland/setup-deno@v1
         with:
