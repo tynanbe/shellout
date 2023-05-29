@@ -1,21 +1,21 @@
-interface Task {
+export type Task = {
   name?: string;
   cmd: Array<string>;
-}
+};
 
-interface Workbook {
+export type Workbook = {
   readonly [index: string]: (...args: Array<string>) => void;
-}
+};
 
-let Workbook: Workbook = {
+export const Workbook: Workbook = {
   check: (...args) => {
     args = args.length ? args : ["gleam", "typescript"];
-    let item = (task: Task) => {
+    const item = (task: Task) => {
       if (typeof task.name !== "undefined" && args.includes(task.name)) {
         tasks.push(task);
       }
     };
-    let tasks: Array<Task> = [];
+    const tasks: Array<Task> = [];
     item({
       name: "gleam",
       cmd: ["gleam", "check"],
@@ -28,10 +28,10 @@ let Workbook: Workbook = {
   },
 
   format: (...args) => {
-    let is_check = args.includes("--check");
+    const is_check = args.includes("--check");
     args = args.filter((x) => !["--check"].includes(x));
     args = args.length ? args : ["gleam", "erlang", "javascript"];
-    let item = (task: Task) => {
+    const item = (task: Task) => {
       if (typeof task.name !== "undefined" && args.includes(task.name)) {
         if (is_check) {
           task.cmd.push("--check");
@@ -39,7 +39,7 @@ let Workbook: Workbook = {
         tasks.push(task);
       }
     };
-    let tasks: Array<Task> = [];
+    const tasks: Array<Task> = [];
     item({
       name: "gleam",
       cmd: [
@@ -80,7 +80,7 @@ let Workbook: Workbook = {
 
   test: (...args) => {
     args = args.length ? args : ["erlang", "deno", "node"];
-    let item = (target: string, runtime?: string) => {
+    const item = (target: string, runtime?: string) => {
       if (args.includes(target) || runtime && args.includes(runtime)) {
         tasks.push({
           name: runtime ?? target,
@@ -93,7 +93,7 @@ let Workbook: Workbook = {
         });
       }
     };
-    let tasks: Array<Task> = [];
+    const tasks: Array<Task> = [];
     item("erlang");
     item("javascript", "deno");
     item("javascript", "node");
@@ -101,20 +101,20 @@ let Workbook: Workbook = {
   },
 };
 
-let reset = "\x1b[0m\x1b[K";
+const reset = "\x1b[0m\x1b[K";
 
-let task = Workbook[Deno.args[0]] ?? Workbook.help;
-task(...Deno.args.slice(1));
+const task = Workbook[Deno.args[0] ?? "help"] ?? Workbook["help"];
+task?.(...Deno.args.slice(1));
 
-async function run(tasks: Array<Task>): Promise<void> {
-  let total = tasks.length;
+export async function run(tasks: Array<Task>): Promise<void> {
+  const total = tasks.length;
   if (!total) {
     error("no tasks to run");
     Deno.exit(1);
   }
   console.log();
   let acc = 0;
-  for (let task of tasks) {
+  for (const task of tasks) {
     if (typeof task.name !== "undefined") {
       console.log(`\x1b[35m  Targeting${reset} ${task.name}...`);
     }

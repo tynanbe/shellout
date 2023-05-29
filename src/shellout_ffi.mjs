@@ -60,10 +60,7 @@ export function os_command(command, args, dir, opts) {
     return new Error([1, executable[0]]);
   }
 
-  let getBool = (map, key) => {
-    let result = map.get(key);
-    return result.isOk() ? result[0] : false;
-  };
+  let getBool = (map, key) => (map.get(key) ?? false);
 
   let isDeno = Boolean(globalThis.Deno?.Command);
 

@@ -196,7 +196,7 @@ pub fn style(
 ) -> String {
   ["display", "color", "background"]
   |> list.map(with: fn(flag) {
-    use strings <- result.then(map.get(flags, flag))
+    use strings <- result.try(map.get(flags, flag))
     lookups
     |> list.filter_map(with: fn(item) {
       let #(keys, lookup) = item
