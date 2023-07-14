@@ -21,24 +21,22 @@ const lookups: Lookups = [
   ),
 ]
 
-if erlang {
-  pub fn arguments_test() {
-    shellout.arguments()
-    |> should.equal([])
-  }
+@target(erlang)
+pub fn arguments_test() {
+  shellout.arguments()
+  |> should.equal([])
 }
 
-if javascript {
-  pub fn arguments_test() {
-    case shellout.arguments() {
-      [entrypoint] ->
-        // JavaScript gets an extra argument for its test module entrypoint
-        // since Gleam v0.26
-        entrypoint
-        |> string.ends_with("/shellout/gleam.main.mjs")
-        |> should.be_true
-      _else -> Nil
-    }
+@target(javascript)
+pub fn arguments_test() {
+  case shellout.arguments() {
+    [entrypoint] ->
+      // JavaScript gets an extra argument for its test module entrypoint
+      // since Gleam v0.26
+      entrypoint
+      |> string.ends_with("/shellout/gleam.main.mjs")
+      |> should.be_true
+    _else -> Nil
   }
 }
 
@@ -74,19 +72,17 @@ pub fn command_test() {
   |> should.not_equal("")
 }
 
-if erlang {
-  // Erlang ports can't separate stderr from stdout; it's all or nothing
-  fn should_be_without_stdout(message) {
-    message
-    |> should.equal("")
-  }
+// Erlang ports can't separate stderr from stdout; it's all or nothing
+@target(erlang)
+fn should_be_without_stdout(message) {
+  message
+  |> should.equal("")
 }
 
-if javascript {
-  fn should_be_without_stdout(message) {
-    message
-    |> should.not_equal("")
-  }
+@target(javascript)
+fn should_be_without_stdout(message) {
+  message
+  |> should.not_equal("")
 }
 
 pub fn style_test() {

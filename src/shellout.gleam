@@ -3,10 +3,8 @@ import gleam/list
 import gleam/map.{Map}
 import gleam/result
 import gleam/string
-
-if erlang {
-  import gleam/erlang
-}
+@target(erlang)
+import gleam/erlang
 
 /// A list of tuples in which the first element of each tuple is a label and the
 /// second element is a list of one or more number strings representing a
@@ -214,16 +212,14 @@ pub fn style(
   |> escape(string)
 }
 
-if erlang {
-  fn escape(code: String, string: String) -> String {
-    string.concat(["\e[", code, "m", string, "\e[0m\e[K"])
-  }
+@target(erlang)
+fn escape(code: String, string: String) -> String {
+  string.concat(["\e[", code, "m", string, "\e[0m\e[K"])
 }
 
-if javascript {
-  external fn escape(String, String) -> String =
-    "./shellout_ffi.mjs" "escape"
-}
+@target(javascript)
+@external(javascript, "./shellout_ffi.mjs", "escape")
+fn escape(a: String, b: String) -> String
 
 type Style {
   Name(String)
@@ -335,16 +331,14 @@ pub fn arguments() -> List(String) {
   do_arguments()
 }
 
-if erlang {
-  fn do_arguments() -> List(String) {
-    erlang.start_arguments()
-  }
+@target(erlang)
+fn do_arguments() -> List(String) {
+  erlang.start_arguments()
 }
 
-if javascript {
-  external fn do_arguments() -> List(String) =
-    "./shellout_ffi.mjs" "start_arguments"
-}
+@target(javascript)
+@external(javascript, "./shellout_ffi.mjs", "start_arguments")
+fn do_arguments() -> List(String)
 
 /// Options for controlling the behavior of [`command`](#command).
 ///
@@ -440,25 +434,12 @@ pub fn command(
   |> do_command(executable, arguments, directory, _)
 }
 
-if erlang {
-  external fn do_command(
-    String,
-    List(String),
-    String,
-    Map(CommandOpt, Bool),
-  ) -> Result(String, #(Int, String)) =
-    "shellout_ffi" "os_command"
-}
-
-if javascript {
-  external fn do_command(
-    String,
-    List(String),
-    String,
-    Map(CommandOpt, Bool),
-  ) -> Result(String, #(Int, String)) =
-    "./shellout_ffi.mjs" "os_command"
-}
+@external(erlang, "shellout_ffi", "os_command")
+@external(javascript, "./shellout_ffi.mjs", "os_command")
+fn do_command(a: String, b: List(String), c: String, d: Map(CommandOpt, Bool)) -> Result(
+  String,
+  #(Int, String),
+)
 
 /// Halts the runtime and passes the given `status` code to the operating
 /// system.
@@ -484,15 +465,9 @@ pub fn exit(status: Int) -> Nil {
   do_exit(status)
 }
 
-if erlang {
-  external fn do_exit(status: Int) -> Nil =
-    "shellout_ffi" "os_exit"
-}
-
-if javascript {
-  external fn do_exit(status: Int) -> Nil =
-    "./shellout_ffi.mjs" "os_exit"
-}
+@external(erlang, "shellout_ffi", "os_exit")
+@external(javascript, "./shellout_ffi.mjs", "os_exit")
+fn do_exit(status status: Int) -> Nil
 
 /// Results in a path to the given `executable` on success, or an `Error` when
 /// no such path is found.
@@ -518,12 +493,6 @@ pub fn which(executable: String) -> Result(String, String) {
   do_which(executable)
 }
 
-if erlang {
-  external fn do_which(String) -> Result(String, String) =
-    "shellout_ffi" "os_which"
-}
-
-if javascript {
-  external fn do_which(String) -> Result(String, String) =
-    "./shellout_ffi.mjs" "os_which"
-}
+@external(erlang, "shellout_ffi", "os_which")
+@external(javascript, "./shellout_ffi.mjs", "os_which")
+fn do_which(a: String) -> Result(String, String)
