@@ -1,6 +1,6 @@
 -module(shellout_ffi).
 
--export([os_command/4, os_exit/1, os_which/1]).
+-export([os_command/4, os_exit/1, os_which/1, start_arguments/0]).
 
 os_command(Command, Args, Dir, Opts) ->
     Which =
@@ -115,3 +115,6 @@ os_which(Command) ->
                 {ok, Executable}
         end,
     {Result, list_to_binary(OutputChars)}.
+
+start_arguments() ->
+    lists:map(fun unicode:characters_to_binary/1, init:get_plain_arguments()).

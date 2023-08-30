@@ -4,10 +4,6 @@ import gleam/map.{Map}
 import gleam/result
 import gleam/string
 
-if erlang {
-  import gleam/erlang
-}
-
 /// A list of tuples in which the first element of each tuple is a label and the
 /// second element is a list of one or more number strings representing a
 /// singular ANSI style.
@@ -111,12 +107,12 @@ pub const colors: Lookup = [
 /// ## Examples
 ///
 /// ```gleam
-/// > style(
-/// >   "radical",
-/// >   with: display(["bold", "italic", "tubular"]),
-/// >   custom: [],
-/// > )
-/// "\e[1;3mradical\e[0m\e[K"
+/// style(
+///   "radical",
+///   with: display(["bold", "italic", "tubular"]),
+///   custom: [],
+/// )
+/// // -> "\e[1;3mradical\e[0m\e[K"
 /// ```
 ///
 pub fn display(values: List(String)) -> StyleFlags {
@@ -129,12 +125,12 @@ pub fn display(values: List(String)) -> StyleFlags {
 /// ## Examples
 ///
 /// ```gleam
-/// > style(
-/// >   "uh...",
-/// >   with: color(["yellow", "brightgreen", "gnarly"]),
-/// >   custom: [],
-/// > )
-/// "\e[33;92muh...\e[0m\e[K"
+/// style(
+///   "uh...",
+///   with: color(["yellow", "brightgreen", "gnarly"]),
+///   custom: [],
+/// )
+/// // -> "\e[33;92muh...\e[0m\e[K"
 /// ```
 ///
 pub fn color(values: List(String)) -> StyleFlags {
@@ -147,12 +143,12 @@ pub fn color(values: List(String)) -> StyleFlags {
 /// ## Examples
 ///
 /// ```gleam
-/// > style(
-/// >   "awesome",
-/// >   with: background(["yellow", "brightgreen", "bodacious"]),
-/// >   custom: [],
-/// > )
-/// "\e[43;102mawesome\e[0m\e[K"
+/// style(
+///   "awesome",
+///   with: background(["yellow", "brightgreen", "bodacious"]),
+///   custom: [],
+/// )
+/// // -> "\e[43;102mawesome\e[0m\e[K"
 /// ```
 ///
 pub fn background(values: List(String)) -> StyleFlags {
@@ -168,25 +164,25 @@ pub fn background(values: List(String)) -> StyleFlags {
 /// ## Examples
 ///
 /// ```gleam
-/// > import gleam/map
-/// > pub const lookups: Lookups = [
-/// >   #(
-/// >     ["color", "background"],
-/// >     [
-/// >       #("buttercup", ["252", "226", "174"]),
-/// >       #("mint", ["182", "255", "234"]),
-/// >       #("pink", ["255", "175", "243"]),
-/// >     ],
-/// >   ),
-/// > ]
-/// > style(
-/// >   "cowabunga",
-/// >   with: display(["bold", "italic", "awesome"])
-/// >   |> map.merge(color(["pink", "righteous"]))
-/// >   |> map.merge(background(["brightblack", "excellent"])),
-/// >   custom: lookups,
-/// > )
-/// "\e[1;3;38;2;255;175;243;100mcowabunga\e[0m\e[K"
+/// import gleam/map
+/// pub const lookups: Lookups = [
+///   #(
+///     ["color", "background"],
+///     [
+///       #("buttercup", ["252", "226", "174"]),
+///       #("mint", ["182", "255", "234"]),
+///       #("pink", ["255", "175", "243"]),
+///     ],
+///   ),
+/// ]
+/// style(
+///   "cowabunga",
+///   with: display(["bold", "italic", "awesome"])
+///   |> map.merge(color(["pink", "righteous"]))
+///   |> map.merge(background(["brightblack", "excellent"])),
+///   custom: lookups,
+/// )
+/// // -> "\e[1;3;38;2;255;175;243;100mcowabunga\e[0m\e[K"
 /// ```
 ///
 pub fn style(
@@ -214,16 +210,14 @@ pub fn style(
   |> escape(string)
 }
 
-if erlang {
-  fn escape(code: String, string: String) -> String {
-    string.concat(["\e[", code, "m", string, "\e[0m\e[K"])
-  }
+@target(erlang)
+fn escape(code: String, string: String) -> String {
+  string.concat(["\e[", code, "m", string, "\e[0m\e[K"])
 }
 
-if javascript {
-  external fn escape(String, String) -> String =
-    "./shellout_ffi.mjs" "escape"
-}
+@target(javascript)
+@external(javascript, "./shellout_ffi.mjs", "escape")
+fn escape(code: String, string: String) -> String
 
 type Style {
   Name(String)
@@ -321,30 +315,19 @@ fn do_style(lookup: Lookup, strings: List(String), flag: String) -> List(String)
 ///
 /// ```gleam
 /// // $ gleam run -- pizza --order=5 --anchovies=false
-/// > arguments()
-/// ["pizza", "--order=5", "--anchovies=false"]
+/// arguments()
+/// // -> ["pizza", "--order=5", "--anchovies=false"]
 /// ```
 ///
 /// ```gleam
 /// // $ gleam run --target=javascript
-/// > arguments()
-/// []
+/// arguments()
+/// // -> []
 /// ```
 ///
-pub fn arguments() -> List(String) {
-  do_arguments()
-}
-
-if erlang {
-  fn do_arguments() -> List(String) {
-    erlang.start_arguments()
-  }
-}
-
-if javascript {
-  external fn do_arguments() -> List(String) =
-    "./shellout_ffi.mjs" "start_arguments"
-}
+@external(erlang, "shellout_ffi", "start_arguments")
+@external(javascript, "./shellout_ffi.mjs", "start_arguments")
+pub fn arguments() -> List(String)
 
 /// Options for controlling the behavior of [`command`](#command).
 ///
@@ -399,33 +382,33 @@ pub type CommandOpt {
 /// ## Examples
 ///
 /// ```gleam
-/// > command(run: "echo", with: ["-n", "Cool!"], in: ".", opt: [])
-/// Ok("Cool!")
+/// command(run: "echo", with: ["-n", "Cool!"], in: ".", opt: [])
+/// // -> Ok("Cool!")
 /// ```
 ///
 /// ```gleam
-/// > command(run: "echo", with: ["Cool!"], in: ".", opt: [LetBeStdout])
+/// command(run: "echo", with: ["Cool!"], in: ".", opt: [LetBeStdout])
 /// // Cool!
-/// Ok("")
+/// // -> Ok("")
 /// ```
 ///
 /// ```gleam
 /// // $ stat -c '%a %U %n' /tmp/dimension_x
 /// // 700 root /tmp/dimension_x
-/// > command(run: "ls", with: ["dimension_x"], in: "/tmp", opt: [])
-/// Error(#(2, "ls: cannot open directory 'dimension_x': Permission denied\n"))
+/// command(run: "ls", with: ["dimension_x"], in: "/tmp", opt: [])
+/// // -> Error(#(2, "ls: cannot open directory 'dimension_x': Permission denied\n"))
 /// ```
 ///
 /// ```gleam
-/// > command(run: "dimension_X", with: [], in: ".", opt: [])
-/// Error(#(1, "command `dimension_x` not found\n"))
+/// command(run: "dimension_x", with: [], in: ".", opt: [])
+/// // -> Error(#(1, "command `dimension_x` not found\n"))
 /// ```
 ///
 /// ```gleam
 /// // $ ls -p
 /// // gleam.toml  manifest.toml  src/  test/
-/// > command(run: "echo", with: [], in: "dimension_x", opt: [])
-/// Error(#(2, "The directory \"dimension_x\" does not exist\n"))
+/// command(run: "echo", with: [], in: "dimension_x", opt: [])
+/// // -> Error(#(2, "The directory \"dimension_x\" does not exist\n"))
 /// ```
 ///
 pub fn command(
@@ -440,25 +423,14 @@ pub fn command(
   |> do_command(executable, arguments, directory, _)
 }
 
-if erlang {
-  external fn do_command(
-    String,
-    List(String),
-    String,
-    Map(CommandOpt, Bool),
-  ) -> Result(String, #(Int, String)) =
-    "shellout_ffi" "os_command"
-}
-
-if javascript {
-  external fn do_command(
-    String,
-    List(String),
-    String,
-    Map(CommandOpt, Bool),
-  ) -> Result(String, #(Int, String)) =
-    "./shellout_ffi.mjs" "os_command"
-}
+@external(erlang, "shellout_ffi", "os_command")
+@external(javascript, "./shellout_ffi.mjs", "os_command")
+fn do_command(
+  executable: String,
+  arguments: List(String),
+  directory: String,
+  options: Map(CommandOpt, Bool),
+) -> Result(String, #(Int, String))
 
 /// Halts the runtime and passes the given `status` code to the operating
 /// system.
@@ -470,13 +442,13 @@ if javascript {
 ///
 /// ```gleam
 /// // $ gleam run && echo "Pizza time!"
-/// > exit(0)
+/// exit(0)
 /// // Pizza time!
 /// ```
 ///
 /// ```gleam
 /// // $ gleam run || echo "Ugh, shell shock ..."
-/// > exit(1)
+/// exit(1)
 /// // Ugh, shell shock ...
 /// ```
 ///
@@ -484,15 +456,9 @@ pub fn exit(status: Int) -> Nil {
   do_exit(status)
 }
 
-if erlang {
-  external fn do_exit(status: Int) -> Nil =
-    "shellout_ffi" "os_exit"
-}
-
-if javascript {
-  external fn do_exit(status: Int) -> Nil =
-    "./shellout_ffi.mjs" "os_exit"
-}
+@external(erlang, "shellout_ffi", "os_exit")
+@external(javascript, "./shellout_ffi.mjs", "os_exit")
+fn do_exit(status status: Int) -> Nil
 
 /// Results in a path to the given `executable` on success, or an `Error` when
 /// no such path is found.
@@ -500,30 +466,24 @@ if javascript {
 /// ## Examples
 ///
 /// ```gleam
-/// > which("echo")
-/// Ok("/sbin/echo")
+/// which("echo")
+/// // -> Ok("/sbin/echo")
 /// ```
 ///
 /// ```gleam
-/// > which("./priv/party")
-/// Ok("./priv/party")
+/// which("./priv/party")
+/// // -> Ok("./priv/party")
 /// ```
 ///
 /// ```gleam
-/// > which("dimension_x")
-/// Error("command `dimension_x` not found")
+/// which("dimension_x")
+/// // -> Error("command `dimension_x` not found")
 /// ```
 ///
 pub fn which(executable: String) -> Result(String, String) {
   do_which(executable)
 }
 
-if erlang {
-  external fn do_which(String) -> Result(String, String) =
-    "shellout_ffi" "os_which"
-}
-
-if javascript {
-  external fn do_which(String) -> Result(String, String) =
-    "./shellout_ffi.mjs" "os_which"
-}
+@external(erlang, "shellout_ffi", "os_which")
+@external(javascript, "./shellout_ffi.mjs", "os_which")
+fn do_which(command: String) -> Result(String, String)
