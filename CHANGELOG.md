@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v1.4.0 - 2023-08-29
 
 - Shellout now requires Gleam v0.30 or later.
 - Shellout no longer depends on `gleam_erlang`.
