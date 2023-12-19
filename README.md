@@ -47,7 +47,7 @@ pub fn main() {
       |> dict.merge(from: shellout.background(["brightblack"]))
     message
     |> shellout.style(with: style, custom: lookups)
-    |> io.print
+    |> io.print_error
     status
   })
   |> result.unwrap_both
