@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.5.0 - 2023-12-19
+
+- Shellout now requires Gleam v0.33 or later.
+
 ## v1.4.0 - 2023-08-29
 
 - Shellout now requires Gleam v0.30 or later.
