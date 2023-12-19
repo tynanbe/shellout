@@ -1,8 +1,8 @@
-import gleam/map
+import gleam/dict
 import gleam/string
 import gleeunit
 import gleeunit/should
-import shellout.{LetBeStderr, LetBeStdout, Lookups}
+import shellout.{type Lookups, LetBeStderr, LetBeStdout}
 
 pub fn main() {
   gleeunit.main()
@@ -100,8 +100,8 @@ pub fn style_test() {
     message
     |> shellout.style(
       with: shellout.display(["bold", "italic"])
-      |> map.merge(shellout.color(["pink"]))
-      |> map.merge(shellout.background(["brightblack"])),
+      |> dict.merge(shellout.color(["pink"]))
+      |> dict.merge(shellout.background(["brightblack"])),
       custom: lookups,
     )
   styled

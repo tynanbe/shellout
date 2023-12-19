@@ -1,6 +1,6 @@
 import gleam/int
 import gleam/list
-import gleam/map.{Map}
+import gleam/dict.{type Dict}
 import gleam/result
 import gleam/string
 
@@ -54,7 +54,7 @@ pub type Lookups =
 /// [`background`](#background) functions.
 ///
 pub type StyleFlags =
-  Map(String, List(String))
+  Dict(String, List(String))
 
 /// A list of ANSI styles representing non-color display effects.
 ///
@@ -112,11 +112,11 @@ pub const colors: Lookup = [
 ///   with: display(["bold", "italic", "tubular"]),
 ///   custom: [],
 /// )
-/// // -> "\e[1;3mradical\e[0m\e[K"
+/// // -> "\u{001b}[1;3mradical\u{001b}[0m\u{001b}[K"
 /// ```
 ///
 pub fn display(values: List(String)) -> StyleFlags {
-  map.from_list([#("display", values)])
+  dict.from_list([#("display", values)])
 }
 
 /// Converts a list of `"color"` style labels into a
@@ -130,11 +130,11 @@ pub fn display(values: List(String)) -> StyleFlags {
 ///   with: color(["yellow", "brightgreen", "gnarly"]),
 ///   custom: [],
 /// )
-/// // -> "\e[33;92muh...\e[0m\e[K"
+/// // -> "\u{001b}[33;92muh...\u{001b}[0m\u{001b}[K"
 /// ```
 ///
 pub fn color(values: List(String)) -> StyleFlags {
-  map.from_list([#("color", values)])
+  dict.from_list([#("color", values)])
 }
 
 /// Converts a list of `"background"` style labels into a
@@ -148,11 +148,11 @@ pub fn color(values: List(String)) -> StyleFlags {
 ///   with: background(["yellow", "brightgreen", "bodacious"]),
 ///   custom: [],
 /// )
-/// // -> "\e[43;102mawesome\e[0m\e[K"
+/// // -> "\u{001b}[43;102mawesome\u{001b}[0m\u{001b}[K"
 /// ```
 ///
 pub fn background(values: List(String)) -> StyleFlags {
-  map.from_list([#("background", values)])
+  dict.from_list([#("background", values)])
 }
 
 /// Applies ANSI styles to a string, resetting styling at the end.
@@ -164,7 +164,7 @@ pub fn background(values: List(String)) -> StyleFlags {
 /// ## Examples
 ///
 /// ```gleam
-/// import gleam/map
+/// import gleam/dict
 /// pub const lookups: Lookups = [
 ///   #(
 ///     ["color", "background"],
@@ -178,11 +178,11 @@ pub fn background(values: List(String)) -> StyleFlags {
 /// style(
 ///   "cowabunga",
 ///   with: display(["bold", "italic", "awesome"])
-///   |> map.merge(color(["pink", "righteous"]))
-///   |> map.merge(background(["brightblack", "excellent"])),
+///   |> dict.merge(color(["pink", "righteous"]))
+///   |> dict.merge(background(["brightblack", "excellent"])),
 ///   custom: lookups,
 /// )
-/// // -> "\e[1;3;38;2;255;175;243;100mcowabunga\e[0m\e[K"
+/// // -> "\u{001b}[1;3;38;2;255;175;243;100mcowabunga\u{001b}[0m\u{001b}[K"
 /// ```
 ///
 pub fn style(
@@ -192,7 +192,7 @@ pub fn style(
 ) -> String {
   ["display", "color", "background"]
   |> list.map(with: fn(flag) {
-    use strings <- result.try(map.get(flags, flag))
+    use strings <- result.try(dict.get(flags, flag))
     lookups
     |> list.filter_map(with: fn(item) {
       let #(keys, lookup) = item
@@ -212,7 +212,7 @@ pub fn style(
 
 @target(erlang)
 fn escape(code: String, string: String) -> String {
-  string.concat(["\e[", code, "m", string, "\e[0m\e[K"])
+  string.concat(["\u{001b}[", code, "m", string, "\u{001b}[0m\u{001b}[K"])
 }
 
 @target(javascript)
@@ -231,47 +231,46 @@ type StyleAcc {
 fn do_style(lookup: Lookup, strings: List(String), flag: String) -> List(String) {
   let lookup =
     case flag {
-      "display" -> map.from_list(displays)
-      "color" -> map.from_list(colors)
+      "display" -> dict.from_list(displays)
+      "color" -> dict.from_list(colors)
       "background" ->
         colors
-        |> map.from_list
-        |> map.map_values(with: fn(_key, code) {
+        |> dict.from_list
+        |> dict.map_values(with: fn(_key, code) {
           let assert [code] = code
           let assert Ok(code) = int.parse(code)
           [int.to_string(code + 10)]
         })
+      _else -> panic as "invalid lookup flag"
     }
-    |> map.merge(from: map.from_list(lookup))
+    |> dict.merge(from: dict.from_list(lookup))
 
   let acc = StyleAcc(styles: [], rgb_counter: 0)
   let acc =
     strings
-    |> list.fold(
-      from: acc,
-      with: fn(acc, item) {
-        case int.parse(item) {
-          Ok(int) -> {
-            let item =
-              int
-              |> int.clamp(min: 0, max: 255)
-              |> int.to_string
-            let rgb_counter = acc.rgb_counter
-            case rgb_counter < 3 {
-              True if rgb_counter > 0 -> {
-                let [Rgb(values), ..styles] = acc.styles
-                StyleAcc(
-                  styles: [Rgb([item, ..values]), ..styles],
-                  rgb_counter: rgb_counter + 1,
-                )
-              }
-              _ -> StyleAcc(styles: [Rgb([item]), ..acc.styles], rgb_counter: 1)
+    |> list.fold(from: acc, with: fn(acc, item) {
+      case int.parse(item) {
+        Ok(int) -> {
+          let item =
+            int
+            |> int.clamp(min: 0, max: 255)
+            |> int.to_string
+          let rgb_counter = acc.rgb_counter
+          case rgb_counter < 3 {
+            True if rgb_counter > 0 -> {
+              let assert [Rgb(values), ..styles] = acc.styles
+              StyleAcc(
+                styles: [Rgb([item, ..values]), ..styles],
+                rgb_counter: rgb_counter
+                + 1,
+              )
             }
+            _ -> StyleAcc(styles: [Rgb([item]), ..acc.styles], rgb_counter: 1)
           }
-          _ -> StyleAcc(styles: [Name(item), ..acc.styles], rgb_counter: 0)
         }
-      },
-    )
+        _ -> StyleAcc(styles: [Name(item), ..acc.styles], rgb_counter: 0)
+      }
+    })
 
   let prepare_rgb = fn(strings) {
     let new_strings =
@@ -291,7 +290,7 @@ fn do_style(lookup: Lookup, strings: List(String), flag: String) -> List(String)
     case style {
       Name(string) ->
         lookup
-        |> map.get(string)
+        |> dict.get(string)
         |> result.map(with: fn(strings) {
           case list.length(strings) > 1 {
             False -> strings
@@ -419,7 +418,7 @@ pub fn command(
 ) -> Result(String, #(Int, String)) {
   options
   |> list.map(with: fn(opt) { #(opt, True) })
-  |> map.from_list
+  |> dict.from_list
   |> do_command(executable, arguments, directory, _)
 }
 
@@ -429,7 +428,7 @@ fn do_command(
   executable: String,
   arguments: List(String),
   directory: String,
-  options: Map(CommandOpt, Bool),
+  options: Dict(CommandOpt, Bool),
 ) -> Result(String, #(Int, String))
 
 /// Halts the runtime and passes the given `status` code to the operating

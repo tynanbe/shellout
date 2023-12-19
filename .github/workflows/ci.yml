@@ -11,13 +11,13 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - uses: erlef/setup-beam@v1
         with:
           otp-version: "25"
           rebar3-version: "3"
-          gleam-version: "0.30"
+          gleam-version: "0.33"
 
       - uses: denoland/setup-deno@v1
         with:
@@ -32,9 +32,9 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-          node-version: "18"
+          node-version: "20"
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           repository: WhatsApp/erlfmt
           path: _temp/erlfmt
