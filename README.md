@@ -16,9 +16,10 @@ A Gleam library for cross-platform shell operations.
 • In `my_project/src/my_project.gleam`
 
 ```gleam
+import gleam/dict
 import gleam/io
-import gleam/map
-import shellout.{Lookups}
+import gleam/result
+import shellout.{type Lookups}
 
 pub const lookups: Lookups = [
   #(
@@ -32,27 +33,24 @@ pub const lookups: Lookups = [
 ]
 
 pub fn main() {
-  let result =
-    shellout.arguments()
-    |> shellout.command(run: "ls", in: ".", opt: [])
-
-  case result {
-    Ok(output) -> {
-      io.print(output)
-      0
-    }
-    Error(#(status, message)) -> {
-      message
-      |> shellout.style(
-        with: shellout.display(["bold", "italic"])
-        |> map.merge(shellout.color(["pink"]))
-        |> map.merge(shellout.background(["brightblack"])),
-        custom: lookups,
-      )
-      |> io.print
-      status
-    }
-  }
+  shellout.arguments()
+  |> shellout.command(run: "ls", in: ".", opt: [])
+  |> result.map(with: fn(output) {
+    io.print(output)
+    0
+  })
+  |> result.map_error(with: fn(detail) {
+    let #(status, message) = detail
+    let style =
+      shellout.display(["bold", "italic"])
+      |> dict.merge(from: shellout.color(["pink"]))
+      |> dict.merge(from: shellout.background(["brightblack"]))
+    message
+    |> shellout.style(with: style, custom: lookups)
+    |> io.print
+    status
+  })
+  |> result.unwrap_both
   |> shellout.exit
 }
 ```
