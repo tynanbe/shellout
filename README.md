@@ -79,9 +79,8 @@ pub fn main() {
 
 • Add `shellout` to `gleam.toml`
 
-```toml
-[dependencies]
-shellout = "~> 1.5"
+```shell
+gleam add shellout
 ```
 
 ### As a dependency of your Mix project
@@ -91,7 +90,7 @@ shellout = "~> 1.5"
 ```elixir
 defp deps do
   [
-    {:shellout, "~> 1.5"},
+    {:shellout, "~> 1.6"},
   ]
 end
 ```
@@ -102,6 +101,6 @@ end
 
 ```erlang
 {deps, [
-  {shellout, "1.5.0"}
+  {shellout, "1.6.0"}
 ]}.
 ```

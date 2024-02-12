@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v1.6.0 - 2024-02-12
 
 - Shellout now supports `gleam_stdlib` v1.0.
 - Shellout now requires Gleam v0.34 or later.
