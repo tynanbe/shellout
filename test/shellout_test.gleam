@@ -41,13 +41,13 @@ pub fn arguments_test() {
 }
 
 pub fn command_test() {
-  let echo = shellout.command(run: "echo", with: [message], in: ".", opt: _)
+  let print = shellout.command(run: "echo", with: [message], in: ".", opt: _)
 
-  let assert Ok(output) = echo([])
+  let assert Ok(output) = print([])
   output
   |> should.not_equal("")
 
-  let assert Ok(new_output) = echo([LetBeStderr])
+  let assert Ok(new_output) = print([LetBeStderr])
   new_output
   |> should.equal(output)
 
@@ -100,8 +100,8 @@ pub fn style_test() {
     message
     |> shellout.style(
       with: shellout.display(["bold", "italic"])
-      |> dict.merge(shellout.color(["pink"]))
-      |> dict.merge(shellout.background(["brightblack"])),
+        |> dict.merge(shellout.color(["pink"]))
+        |> dict.merge(shellout.background(["brightblack"])),
       custom: lookups,
     )
   styled

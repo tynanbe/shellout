@@ -112,7 +112,7 @@ pub const colors: Lookup = [
 ///   with: display(["bold", "italic", "tubular"]),
 ///   custom: [],
 /// )
-/// // -> "\u{001b}[1;3mradical\u{001b}[0m\u{001b}[K"
+/// // -> "\u{1b}[1;3mradical\u{1b}[0m\u{1b}[K"
 /// ```
 ///
 pub fn display(values: List(String)) -> StyleFlags {
@@ -130,7 +130,7 @@ pub fn display(values: List(String)) -> StyleFlags {
 ///   with: color(["yellow", "brightgreen", "gnarly"]),
 ///   custom: [],
 /// )
-/// // -> "\u{001b}[33;92muh...\u{001b}[0m\u{001b}[K"
+/// // -> "\u{1b}[33;92muh...\u{1b}[0m\u{1b}[K"
 /// ```
 ///
 pub fn color(values: List(String)) -> StyleFlags {
@@ -148,7 +148,7 @@ pub fn color(values: List(String)) -> StyleFlags {
 ///   with: background(["yellow", "brightgreen", "bodacious"]),
 ///   custom: [],
 /// )
-/// // -> "\u{001b}[43;102mawesome\u{001b}[0m\u{001b}[K"
+/// // -> "\u{1b}[43;102mawesome\u{1b}[0m\u{1b}[K"
 /// ```
 ///
 pub fn background(values: List(String)) -> StyleFlags {
@@ -182,7 +182,7 @@ pub fn background(values: List(String)) -> StyleFlags {
 ///   |> dict.merge(background(["brightblack", "excellent"])),
 ///   custom: lookups,
 /// )
-/// // -> "\u{001b}[1;3;38;2;255;175;243;100mcowabunga\u{001b}[0m\u{001b}[K"
+/// // -> "\u{1b}[1;3;38;2;255;175;243;100mcowabunga\u{1b}[0m\u{1b}[K"
 /// ```
 ///
 pub fn style(
@@ -210,14 +210,9 @@ pub fn style(
   |> escape(string)
 }
 
-@target(erlang)
 fn escape(code: String, string: String) -> String {
-  string.concat(["\u{001b}[", code, "m", string, "\u{001b}[0m\u{001b}[K"])
+  "\u{1b}[" <> code <> "m" <> string <> "\u{1b}[0m\u{1b}[K"
 }
-
-@target(javascript)
-@external(javascript, "./shellout_ffi.mjs", "escape")
-fn escape(code: String, string: String) -> String
 
 type Style {
   Name(String)
@@ -261,8 +256,7 @@ fn do_style(lookup: Lookup, strings: List(String), flag: String) -> List(String)
               let assert [Rgb(values), ..styles] = acc.styles
               StyleAcc(
                 styles: [Rgb([item, ..values]), ..styles],
-                rgb_counter: rgb_counter
-                + 1,
+                rgb_counter: rgb_counter + 1,
               )
             }
             _ -> StyleAcc(styles: [Rgb([item]), ..acc.styles], rgb_counter: 1)
@@ -451,13 +445,9 @@ fn do_command(
 /// // Ugh, shell shock ...
 /// ```
 ///
-pub fn exit(status: Int) -> Nil {
-  do_exit(status)
-}
-
 @external(erlang, "shellout_ffi", "os_exit")
 @external(javascript, "./shellout_ffi.mjs", "os_exit")
-fn do_exit(status status: Int) -> Nil
+pub fn exit(status: Int) -> Nil
 
 /// Results in a path to the given `executable` on success, or an `Error` when
 /// no such path is found.
@@ -479,10 +469,6 @@ fn do_exit(status status: Int) -> Nil
 /// // -> Error("command `dimension_x` not found")
 /// ```
 ///
-pub fn which(executable: String) -> Result(String, String) {
-  do_which(executable)
-}
-
 @external(erlang, "shellout_ffi", "os_which")
 @external(javascript, "./shellout_ffi.mjs", "os_which")
-fn do_which(command: String) -> Result(String, String)
+pub fn which(executable: String) -> Result(String, String)

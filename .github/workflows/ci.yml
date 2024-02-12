@@ -15,9 +15,9 @@ jobs:
 
       - uses: erlef/setup-beam@v1
         with:
-          otp-version: "25"
+          otp-version: "26"
           rebar3-version: "3"
-          gleam-version: "0.33"
+          gleam-version: "1.0.0-rc1"
 
       - uses: denoland/setup-deno@v1
         with:

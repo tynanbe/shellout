@@ -1,7 +1,7 @@
 import { Error, Ok, toList } from "./gleam.mjs";
 import { LetBeStderr, LetBeStdout, OverlappedStdio } from "./shellout.mjs";
-import * as child_process from "node:child_process";
-import * as fs from "node:fs";
+import { spawnSync } from "node:child_process";
+import { statSync } from "node:fs";
 import * as path from "node:path";
 import process from "node:process";
 
@@ -42,10 +42,6 @@ const Signals = {
   SIGSYS: 31,
   SIGRTMIN: 34,
 };
-
-export function escape(code, string) {
-  return `\x1b[${code}m${string}\x1b[0m\x1b[K`;
-}
 
 export function start_arguments() {
   return toList(globalThis.Deno?.args ?? process.argv.slice(1));
@@ -96,7 +92,7 @@ export function os_command(command, args, dir, opts) {
     result.status = result.code ?? null;
   } else {
     spawnOpts.stdio = [stdin, stdout, stderr];
-    result = child_process.spawnSync(command, args, spawnOpts);
+    result = spawnSync(command, args, spawnOpts);
   }
   if (result.error) {
     result = { status: null };
@@ -141,8 +137,7 @@ export function os_which(command) {
     .concat([command])
     .flatMap((item) => pathexts.map((ext) => item + ext));
   let result = paths.map(
-    (item) =>
-      fs.statSync(item, { throwIfNoEntry: false })?.isFile() ? item : Nil,
+    (item) => statSync(item, { throwIfNoEntry: false })?.isFile() ? item : Nil,
   ).find((item) => item !== Nil);
   return result !== Nil ? new Ok(result) : new Error(
     `command \`${command}\` not found\n`,
