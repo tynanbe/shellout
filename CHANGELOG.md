@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- The environment of launched processes can now be customized using the
+  `SetEnvironment` variant of `CommandOpt`.
+
 ## v1.6.0 - 2024-02-12
 
 - Shellout now supports `gleam_stdlib` v1.0.
