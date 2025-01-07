@@ -343,6 +343,14 @@ pub type CommandOpt {
   /// input stream from behaving as usual.
   ///
   OverlappedStdio
+  /// Set the given name-value pairs as environment variables in the spawned
+  /// process, replacing existing variables with the same names. A value of
+  /// `""` causes the variable to be unset.
+  ///
+  /// If multiple `SetEnvironment` options are passed they will be combined,
+  /// with the last value for each name taking precedence.
+  ///
+  SetEnvironment(List(#(String, String)))
 }
 
 /// Results in any output captured from the given `executable` on success, or an
@@ -410,10 +418,17 @@ pub fn command(
   in directory: String,
   opt options: List(CommandOpt),
 ) -> Result(String, #(Int, String)) {
+  let environment =
+    list.flat_map(options, fn(option) {
+      case option {
+        SetEnvironment(env) -> env
+        _ -> []
+      }
+    })
   options
   |> list.map(with: fn(opt) { #(opt, True) })
   |> dict.from_list
-  |> do_command(executable, arguments, directory, _)
+  |> do_command(executable, arguments, directory, _, environment)
 }
 
 @external(erlang, "shellout_ffi", "os_command")
@@ -423,6 +438,7 @@ fn do_command(
   arguments: List(String),
   directory: String,
   options: Dict(CommandOpt, Bool),
+  environment: List(#(String, String)),
 ) -> Result(String, #(Int, String))
 
 /// Halts the runtime and passes the given `status` code to the operating
