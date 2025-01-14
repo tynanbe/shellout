@@ -17,7 +17,8 @@ os_command(Command, Args, Dir, Opts, EnvBin) ->
             {ok, Executable} ->
                 ExecutableChars = binary_to_list(Executable),
                 LetBeStdout = maps:get(let_be_stdout, Opts, false),
-                FromBin = fun({Name, Val}) -> {binary_to_list(Name), binary_to_list(Val)} end,
+                io:format("~p~n", [file:native_name_encoding()]),
+                FromBin = fun({Name, Val}) -> {binary_to_list(Name), Val} end,
                 Env = lists:map(FromBin, EnvBin),
                 PortSettings = lists:merge([
                     [
