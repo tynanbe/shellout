@@ -47,7 +47,7 @@ export function start_arguments() {
   return toList(globalThis.Deno?.args ?? process.argv.slice(1));
 }
 
-export function os_command(command, args, dir, opts) {
+export function os_command(command, args, dir, opts, env_list) {
   let executable = os_which(command);
   executable = executable.isOk() ? executable : os_which(
     path.join(dir, command),
@@ -76,6 +76,10 @@ export function os_command(command, args, dir, opts) {
     process.on("SIGINT", () => Nil);
     stdout = "inherit";
   }
+  let env = {};
+  for (let e of env_list) {
+    env[e[0]] = e[1];
+  }
 
   let result = {};
   if (isDeno) {
@@ -85,6 +89,7 @@ export function os_command(command, args, dir, opts) {
       stdin,
       stdout,
       stderr,
+      env,
     };
     try {
       result = new Deno.Command(command, spawnOpts).outputSync();
@@ -92,6 +97,9 @@ export function os_command(command, args, dir, opts) {
     result.status = result.code ?? null;
   } else {
     spawnOpts.stdio = [stdin, stdout, stderr];
+    if (env) {
+      spawnOpts.env = { ...process.env, ...env };
+    }
     result = spawnSync(command, args, spawnOpts);
   }
   if (result.error) {

@@ -1,8 +1,8 @@
 -module(shellout_ffi).
 
--export([os_command/4, os_exit/1, os_which/1, start_arguments/0]).
+-export([os_command/5, os_exit/1, os_which/1, start_arguments/0]).
 
-os_command(Command, Args, Dir, Opts) ->
+os_command(Command, Args, Dir, Opts, EnvBin) ->
     Which =
         case os_which(Command) of
             {error, _} ->
@@ -17,10 +17,18 @@ os_command(Command, Args, Dir, Opts) ->
             {ok, Executable} ->
                 ExecutableChars = binary_to_list(Executable),
                 LetBeStdout = maps:get(let_be_stdout, Opts, false),
+                FromBin = fun({Name, Val}) ->
+                    {
+                        binary_to_list(Name),
+                        unicode:characters_to_list(Val, file:native_name_encoding())
+                    }
+                end,
+                Env = lists:map(FromBin, EnvBin),
                 PortSettings = lists:merge([
                     [
                         {args, Args},
                         {cd, Dir},
+                        {env, Env},
                         eof,
                         exit_status,
                         hide,
