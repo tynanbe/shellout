@@ -90,7 +90,7 @@ gleam add shellout
 ```elixir
 defp deps do
   [
-    {:shellout, "~> 1.6"},
+    {:shellout, "~> 1.7"},
   ]
 end
 ```
@@ -101,6 +101,6 @@ end
 
 ```erlang
 {deps, [
-  {shellout, "1.6.0"}
+  {shellout, "1.7.0"}
 ]}.
 ```

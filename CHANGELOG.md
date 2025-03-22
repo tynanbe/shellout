@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v1.7.0 - 2024-03-22
 
 - The environment of launched processes can now be customized using the
   `SetEnvironment` variant of `CommandOpt`.
