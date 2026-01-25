@@ -2,9 +2,10 @@ import { spawnSync } from "node:child_process";
 import { statSync } from "node:fs";
 import { delimiter as pathDelimiter, join as pathJoin } from "node:path";
 import process from "node:process";
-import { is_ok, map_error } from "../gleam_stdlib/gleam/result.mjs";
-import { Error, Ok, toList } from "./gleam.mjs";
-import { LetBeStderr, LetBeStdout, OverlappedStdio } from "./shellout.mjs";
+import { get as dict_get } from "../gleam_stdlib/gleam/dict.mjs";
+import { map_error } from "../gleam_stdlib/gleam/result.mjs";
+import { Result$Ok, Result$Error, Result$isOk, toList } from "./gleam.mjs";
+import { CommandOpt$LetBeStderr, CommandOpt$LetBeStdout, CommandOpt$OverlappedStdio } from "./shellout.mjs";
 
 const Nil = undefined;
 const Signals = {
@@ -50,14 +51,14 @@ export function start_arguments() {
 
 export function os_command(command, args, dir, opts, env_list) {
   let executable = os_which(command);
-  executable = is_ok(executable) ? executable : os_which(
+  executable = Result$isOk(executable) ? executable : os_which(
     pathJoin(dir, command),
   );
-  if (!is_ok(executable)) {
+  if (!Result$isOk(executable)) {
     return map_error(executable, (error) => [1, error]);
   }
 
-  let getBool = (map, key) => (map.get(key) ?? false);
+  let getBool = (dict, key) => Result$isOk(dict_get(dict, key));
 
   let isDeno = Boolean(globalThis.Deno?.Command);
 
@@ -66,13 +67,13 @@ export function os_command(command, args, dir, opts, env_list) {
   let stdout = isDeno ? "piped" : "pipe";
   let stderr = stdout;
   let spawnOpts = { cwd: dir, windowsHide: true };
-  if (!isDeno && getBool(opts, new OverlappedStdio())) {
+  if (!isDeno && getBool(opts, CommandOpt$OverlappedStdio())) {
     stdin = stdout = "overlapped";
   }
-  if (getBool(opts, new LetBeStderr())) {
+  if (getBool(opts, CommandOpt$LetBeStderr())) {
     stderr = "inherit";
   }
-  if (getBool(opts, new LetBeStdout())) {
+  if (getBool(opts, CommandOpt$LetBeStdout())) {
     // Pass Ctrl+C to spawned process.
     process.on("SIGINT", () => Nil);
     stdout = "inherit";
@@ -129,7 +130,7 @@ export function os_command(command, args, dir, opts, env_list) {
     output = `The directory "${dir}" does not exist\n`;
   }
 
-  return 0 === status ? new Ok(output) : new Error([status, output]);
+  return 0 === status ? Result$Ok(output) : Result$Error([status, output]);
 }
 
 export function os_exit(status) {
@@ -148,7 +149,7 @@ export function os_which(command) {
   let result = paths.map(
     (item) => statSync(item, { throwIfNoEntry: false })?.isFile() ? item : Nil,
   ).find((item) => item !== Nil);
-  return result !== Nil ? new Ok(result) : new Error(
+  return result !== Nil ? Result$Ok(result) : Result$Error(
     `command \`${command}\` not found\n`,
   );
 }
