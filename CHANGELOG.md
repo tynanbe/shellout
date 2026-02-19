@@ -5,7 +5,7 @@
 - Shellout now supports `gleam_stdlib` v0.68.
 - Shellout now requires Gleam v1.13 or later.
 
-## v1.7.0 - 2024-03-22
+## v1.7.0 - 2025-03-22
 
 - The environment of launched processes can now be customized using the
   `SetEnvironment` variant of `CommandOpt`.
