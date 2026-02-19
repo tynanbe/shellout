@@ -11,36 +11,36 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: erlef/setup-beam@v1
         with:
-          otp-version: "26"
+          otp-version: "28"
           rebar3-version: "3"
-          gleam-version: "1.0.0-rc1"
+          gleam-version: "1.13.0"
 
-      - uses: denoland/setup-deno@v1
+      - uses: denoland/setup-deno@v2
         with:
-          deno-version: "v1.x"
+          deno-version: "v2.x"
 
-      - uses: actions/cache@v3
+      - uses: actions/cache@v5
         with:
           path: |
             ~/.deno
             ~/.cache/deno
           key: ${{ runner.os }}-deno-${{ hashFiles('deno.lock') }}
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v6
         with:
-          node-version: "20"
+          node-version: "24"
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           repository: WhatsApp/erlfmt
           path: _temp/erlfmt
 
       - id: cache-erlfmt
-        uses: actions/cache@v3
+        uses: actions/cache@v5
         with:
           path: /usr/local/bin/erlfmt
           key: ${{ runner.os }}-erlfmt-${{ hashFiles('_temp/erlfmt/src/erlfmt.app.src') }}
@@ -52,7 +52,7 @@ jobs:
           mv _build/release/bin/erlfmt /usr/local/bin/
 
       - id: cache-gleam
-        uses: actions/cache@v3
+        uses: actions/cache@v5
         with:
           path: build/packages
           key: ${{ runner.os }}-gleam-${{ hashFiles('manifest.toml') }}

@@ -4,8 +4,12 @@ import { delimiter as pathDelimiter, join as pathJoin } from "node:path";
 import process from "node:process";
 import { get as dict_get } from "../gleam_stdlib/gleam/dict.mjs";
 import { map_error } from "../gleam_stdlib/gleam/result.mjs";
-import { Result$Ok, Result$Error, Result$isOk, toList } from "./gleam.mjs";
-import { CommandOpt$LetBeStderr, CommandOpt$LetBeStdout, CommandOpt$OverlappedStdio } from "./shellout.mjs";
+import { Result$Error, Result$isOk, Result$Ok, toList } from "./gleam.mjs";
+import {
+  CommandOpt$LetBeStderr,
+  CommandOpt$LetBeStdout,
+  CommandOpt$OverlappedStdio,
+} from "./shellout.mjs";
 
 const Nil = undefined;
 const Signals = {
